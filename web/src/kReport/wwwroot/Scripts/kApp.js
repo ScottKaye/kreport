@@ -1,4 +1,24 @@
-﻿var app = angular.module("kApp", []);
+﻿var app = angular.module("kApp", ["chart.js", "ui.router", "angularMoment"]);
+
+app.config(function ($stateProvider, $urlRouterProvider) {
+	$urlRouterProvider.otherwise("/Dashboard");
+
+	$stateProvider
+	.state("index", {
+		url: "/Dashboard",
+		templateUrl: "/Partials/index.html",
+		controller: function($rootScope) {
+			$rootScope.title = "Dashboard";
+		}
+	})
+	.state("admin", {
+		url: "/Admin",
+		templateUrl: "/Partials/admin.html",
+		controller: function ($rootScope) {
+			$rootScope.title = "Admin";
+		}
+	});
+});
 
 app.controller("baseController", ["$http", "signalR", "$scope", "$rootScope", function ($http, signalR, $scope, $rootScope) {
 	"use strict";
@@ -11,7 +31,11 @@ app.controller("baseController", ["$http", "signalR", "$scope", "$rootScope", fu
 
 	e.getAllRequests = function () {
 		$http.get("/k/GetAllRequests").then(function (response) {
-			e.requests = response.data;
+			e.requests = response.data.map(function(c) {
+				console.log(c);
+				c.Date = new Date(c.Date);
+				return c;
+			});
 		});
 	};
 
@@ -23,21 +47,25 @@ app.controller("baseController", ["$http", "signalR", "$scope", "$rootScope", fu
 		});
 	};
 
+	//Launches the steam protocol handler to join a server
 	e.joinSelected = function () {
 		window.open("steam://connect/" + e.requestDetail.Server.IP, "_self");
 	};
 
+	//Fires when a new request is received from SignalR
 	$rootScope.$on("newRequest", function (evt, req) {
 		$scope.$apply(function () {
 			e.requests.push(req);
 		});
 	});
 
+	//Fires when TestHub is called from SignalR
 	$rootScope.$on("debug", function (evt, msg) {
 		console.log(msg);
 	});
 }]);
 
+//Small emitter to encapsulate global SignalR stuff
 app.factory("signalR", ["$rootScope", function ($rootScope) {
 
 	var hub = $.connection.Update;
@@ -55,6 +83,7 @@ app.factory("signalR", ["$rootScope", function ($rootScope) {
 	return true;
 }]);
 
+//The chat controller has it's own SignalR instance, and is kept here because.
 app.controller("chatController", ["$http", "$scope", function ($http, $scope) {
 	var e = this;
 	var hub = $.connection.Chat;
@@ -65,7 +94,7 @@ app.controller("chatController", ["$http", "$scope", function ($http, $scope) {
 	e.users = [];
 
 	e.keydown = function (evt) {
-		if(evt.which === 13 && e.message.length > 0) {
+		if (evt.which === 13 && e.message.length > 0) {
 			hub.server.sendMessage(e.message);
 			e.message = "";
 		}
@@ -76,7 +105,7 @@ app.controller("chatController", ["$http", "$scope", function ($http, $scope) {
 			e.messages.push(msg);
 		});
 
-		//Scroll to bottom
+		//Scroll chat to bottom on new message
 		$(".chat-messages").each(function () {
 			this.scrollTop = this.scrollHeight;
 		});
@@ -100,6 +129,7 @@ app.controller("chatController", ["$http", "$scope", function ($http, $scope) {
 	});
 }]);
 
+//Used for ng-repeat to reverse the order items are displayed
 app.filter("reverse", function () {
 	return function (items) {
 		return items.slice().reverse();

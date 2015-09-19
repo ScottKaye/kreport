@@ -31,6 +31,11 @@ namespace kReport.Models
 		{
 			if (request != null)
 			{
+				request.Date = DateTime.Now;
+				if (request.Reason != null)
+				{
+					request.Reason = new string(request.Reason.Trim().Where(char.IsLetterOrDigit).ToArray());
+				}
 				Db.GetCollection<Report>("requests").Save(request);
 			}
 		}

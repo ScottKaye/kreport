@@ -1,61 +1,78 @@
-﻿(function (site, undefined) {
+﻿//site.js: Misc functions used around the site
+//Angular stuff is in kApp.js
 
-	//TODO: Do this in Angular
-	function selectRow(evt) {
-		var row = $(evt.target).closest("tr");
-		var id = row.attr("data-id");
+function toHex(c) {
+	var hex = (+c).toString(16);
+	return hex.length === 1 ? "0" + hex : hex;
+}
 
-		//Move selection class
-		elEntries.find("tr").removeClass("selected");
-		row.addClass("selected");
+function rgbToHex(r, g, b) {
+	return "#" + toHex(r) + toHex(g) + toHex(b);
+};
 
-		ajax.GetRequestById(id, function (data) {
-			var date = moment(data.Date);
-			var exactDate = null;
+//Get exposed primary colour value from <html>
+var primary = rgbToHex.apply(null, getComputedStyle(document.body.parentNode).color.match(/\d+/g));
 
-			//If the date was over a year ago, display the year
-			if (moment().diff(date, "years") > 0) {
-				exactDate = date.format("MMMM Do YYYY, h:mma");
+Chart.defaults.global.colours = [primary];
+Chart.defaults.global.scaleFontColor = "#ffffff";
+Chart.defaults.global.responsive = false;
+Chart.defaults.global.bezierCurve = false;	
+
+//Elements with a class of "frozen" will not scroll, and will stay in their original positions
+$(function () {
+	$(window).on("scroll", function () {
+		$(".frozen").css("transform", "translateY(" + window.scrollY + "px)");
+	});
+});
+
+//Renders spark/ember-style effect on the header
+$(function () {
+	var canvas = document.getElementById("sparks");
+	var w = +getComputedStyle(canvas).width.match(/\d+/g);
+	var h = +getComputedStyle(canvas).height.match(/\d+/g);
+	canvas.width = w;
+	canvas.height = h;
+	var ctx = canvas.getContext("2d");
+	ctx.fillStyle = primary;
+
+	var start = 100;
+
+	var particles = [];
+	var Particle = function () {
+		this.x = Math.random() * w;
+		this.y = Math.random() * start * 2 + h;
+		this.radius = (Math.random() + 0.5) * 3;
+		this.vx = (Math.random() - 0.5) / 20;
+		this.vy = -0.3;
+	};
+
+	function animate() {
+		ctx.clearRect(0, 0, w, h);
+
+		var pIterator = particles.length;
+		while (--pIterator) {
+			var p = particles[pIterator];
+			ctx.fillRect(p.x, p.y, p.radius, p.radius);
+
+			p.vx += (Math.random() - 0.5) / 20;
+
+			p.x += p.vx;
+			p.y += p.vy;
+
+			if (p.x < 0 || p.x > w || p.y < 0) {
+				particles.splice(pIterator, 1);
+				spawn();
 			}
-			else {
-				exactDate = date.format("MMMM Do, h:mma");
-			}
+		}
 
-			var $el = $("[data-placeholder=full-entry-content]");
-			$el.html(
-				$("<div></div>").append(
-					$("<span></span>").text(exactDate)
-				).append(
-					$("<h3></h3>").text(data.Server ? data.Server.Name : "No server name")
-				).append(
-					$("<span></span")
-						.addClass("sender")
-						.text(data.Sender ? data.Sender.Name : "Unknown")
-				).append(
-					" has reported "
-				).append(
-					$("<span></span>")
-						.addClass("target")
-						.text(data.Target ? data.Target.Name : "Unknown")
-				).append(
-					data.Reason != null
-					? $("<span></span>")
-						.html(" because<br><br>")
-						.append(
-							$("<q></q>").text(data.Reason)
-						)
-					: " with no reason given."
-				)
-			);
-			elFeTitle.html(data.Server ? data.Server.Name : "No server name");
-
-			elJoinServer.off();
-			if (data.Server.IP) {
-				elJoinServer.on("click", function () {
-					window.open("steam://connect/" + data.Server.IP, "_self");
-				});
-			}
-		});
+		requestAnimationFrame(animate);
 	}
 
-}(window.site = window.site || {}));
+	function spawn() {
+		particles.push(new Particle());
+	}
+
+	for (var i = 0; i < start; ++i, spawn());
+
+	animate();
+});

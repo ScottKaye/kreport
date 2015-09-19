@@ -1,0 +1,92 @@
+﻿<!DOCTYPE html>
+<html lang="en" ng-app="kApp">
+<head>
+	<meta charset="utf-8" />
+	<title>@ViewBag.Title - kReport 1.0</title>
+	<link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link href="http://fonts.googleapis.com/css?family=Muli" rel="stylesheet">
+	<link href='https://fonts.googleapis.com/css?family=Patrick+Hand' rel='stylesheet' type='text/css'>
+	<link href="~/Style/site.css" rel="stylesheet">
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
+</head>
+<body ng-controller="baseController as base" ng-cloak>
+
+	<header id="top">
+		<h1><a href="~/">kReport 1.0</a></h1>
+		@if (ViewBag.NoNav == null)
+		{
+			<nav class="horizontal-nav">
+				<ul>
+					<li>
+						<a href="~/">Home</a>
+					</li>
+					@if (Model.User == null)
+					{
+						<li>
+							<a href="~/Admin/Login">Login</a>
+						</li>
+					}
+					else
+					{
+						<li>
+							<a href="~/Admin/">Admin</a>
+						</li>
+					}
+				</ul>
+			</nav>
+		}
+		@if (Model.User == null)
+		{
+			<h3 class="right">Created by <strong>Kredit</strong></h3>
+		}
+		else
+		{
+			<h3 class="right">
+				@*  @Context.User.IsInRole("Admin")       @Context.User.Claims.First(c=>c.Type == "name").Value  *@
+				Authenticated as <strong>@Model.User.GetName()</strong>
+				<br>
+				<a href="~/k/Logout">Sign out</a>
+			</h3>
+		}
+	</header>
+
+	@RenderBody()
+
+	@if (Context.User.Identity.IsAuthenticated)
+	{
+		<div class="chat-box" ng-controller="chatController as chat">
+			<div class="chat-messages">
+				<div class="message"
+					 ng-repeat="msg in chat.messages"
+					 ng-class="msg.system ? 'system' : ''"
+					 data-date="{{ msg.date }}">
+					<span class="author"
+						  ng-show="!msg.system"
+						  ng-class="msg.author.admin ? 'admin' : ''">{{ msg.author.name }}</span>
+					{{ msg.message }}
+				</div>
+			</div>
+			<div class="chat-users">
+				<div class="chat-user"
+					 ng-repeat="user in chat.users">
+					{{ user.name }}
+				</div>
+			</div>
+			<input class="chat-input" placeholder="Enter a message..." maxlength="200"
+				   ng-model="chat.message"
+				   ng-keydown="chat.keydown($event)"
+				   ng-disabled="!chat.connected">
+			<div class="chat-extra"></div>
+		</div>
+	}
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
+	<script src="~/Scripts/jquery.signalR-2.2.0.js"></script>
+	<script src="~/signalr/hubs"></script>
+	<script src="~/Scripts/ajax-forms.js"></script>
+	<script src="~/Scripts/kApp.js"></script>
+	@RenderSection("scripts", false)
+</body>
+</html>

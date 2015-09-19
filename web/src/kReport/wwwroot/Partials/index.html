@@ -1,0 +1,59 @@
+﻿<p ng-hide="base.requests.length">No requests!</p>
+
+<section class="entries" ng-init="base.getAllRequests()" ng-show="base.requests.length">
+	<header class="entries-title red">Reports</header>
+	<article ng-repeat="req in base.requests | filter:{Abbreviation:'rep'}"
+			 ng-click="base.request = req; base.getRequest()">
+		<header>
+			<a href="#" am-time-ago="req.Date"></a>
+		</header>
+		<table class="request-table red">
+			<tr>
+				<th>Target</th>
+				<td>{{ req.Target.Name }}</td>
+			</tr>
+			<tr>
+				<th>Sender</th>
+				<td>{{ req.Sender.Name }}</td>
+			</tr>
+			<tr>
+				<th>Reason</th>
+				<td>{{ req.Reason }}</td>
+			</tr>
+			<tr>
+				<th>Server</th>
+				<td>{{ req.Server.Name }}</td>
+			</tr>
+		</table>
+	</article>
+</section>
+
+<section class="entries" ng-show="base.requests.length">
+	<header class="entries-title yellow">Middleman Requests</header>
+
+	<article ng-repeat="req in base.requests | filter:{Abbreviation:'mm'}"
+			 ng-click="base.request = req; base.getRequest()">
+		<header>
+			<a href="#" am-time-ago="req.Date"></a>
+		</header>
+		<table class="request-table yellow">
+			<tr>
+				<th>Target</th>
+				<td>{{ req.Target.Name }}</td>
+			</tr>
+			<tr>
+				<th>Sender</th>
+				<td>{{ req.Sender.Name }}</td>
+			</tr>
+			<tr>
+				<th>Reason</th>
+				<td>{{ req.Reason }}</td>
+			</tr>
+			<tr>
+				<th>Server</th>
+				<td>{{ req.Server.Name }}</td>
+			</tr>
+		</table>
+	</article>
+</section>
+</div>
