@@ -1,0 +1,196 @@
+$anim-speed: 250ms;
+$base-width: 300px;
+
+@mixin animated() {
+	&, &:before, &:after {
+		transition: all $anim-speed ease;
+	}
+}
+
+@mixin contrasted($c) {
+	background: $c;
+	@if(lightness($c) > 50%) {
+		color: #222;
+	}
+	@else {
+		color: #fefefe;
+	}
+}
+
+.future-form {
+	font-family: $font;
+	background: rgba(0,0,0,0.5);
+	padding: 15px;
+	table {
+		margin: 0 auto;
+		background: none;
+		border: none;
+		width: auto;
+		tr td {
+			border: none !important;
+			padding: 10px;
+			label {
+				line-height: normal;
+				margin-bottom: 0;
+			}
+		}
+	}
+	fieldset {
+		border: none;
+		legend {
+			font-weight: 300;
+			font-size: 1.5em;
+			margin-bottom: 10px;
+		}
+	}
+	h1, h2, h3, h4, h5, h6 {
+		margin: 10px 0 0 0;
+	}
+	h1, h2, h3, h4 {
+		font-weight: 300;
+	}
+	label {
+		display: block;
+		position: relative;
+		line-height: 2em;
+		margin-bottom: 20px;
+		input {
+			vertical-align: top;
+			display: inline-block;
+			position: absolute;
+			left: 150px;
+		}
+		.chain {
+			position: absolute;
+			left: 150px;
+		}
+	}
+	input, textarea {
+		box-shadow: none !important; //Firefox insists on putting a ghastly red border around :invalid fields unless this is here...
+		display: block;
+		transform: translateZ(0);
+		font-family: $font;
+		font-size: 10pt;
+		border: none;
+		padding: 8px 5px;
+		outline: none;
+		resize: none;
+		width: $base-width;
+		position: relative;
+		border-bottom: 1px solid $primary;
+		background: linear-gradient(#222 calc(100% - 2px), $bright 0) no-repeat; //it surprised me that this worked too
+		color: #fefefe;
+		background-size: 100% 100%;
+		background-position: -$base-width 0;
+		overflow: visible;
+		@include animated;
+		&.half {
+			width: $base-width / 2;
+			background-position: -$base-width / 2 0;
+		}
+		&.double {
+			width: $base-width * 2;
+			background-position: -$base-width * 2 0;
+		}
+		&:focus, &[required]:valid, &[pattern]:valid {
+			background-position: 0 0;
+			@each $sel in $placeholders {
+				&#{$sel} {
+					visibility: visible !important;
+					font-size: 0.8em;
+					transform: translateY(-1.5em);
+					text-shadow: 0 0 3px #000;
+					&:after {
+						width: 100%;
+					}
+				}
+			}
+		}
+		&:focus:invalid {
+			filter: grayscale(100%) brightness(95%);
+			-webkit-filter: grayscale(100%) brightness(95%);
+		}
+		@each $sel in $placeholders {
+			&#{$sel} {
+				color: #a9a;
+				font-family: $font;
+				position: relative;
+				overflow: hidden;
+				width: $base-width !important;
+				@include animated;
+				&:before {
+					content: "";
+					position: absolute;
+					top: 50%;
+					right: 0;
+					width: 1px;
+					height: 0;
+					transition-delay: $anim-speed / 4;
+					background: rgba(0,0,0,0.2);
+					transform: rotateZ(180deg);
+				}
+				&:after {
+					content: "";
+					position: absolute;
+					top: 50%;
+					left: auto;
+					margin-left: 10px;
+					width: 0;
+					height: 1px;
+					background: rgba(0,0,0,0.2);
+				}
+			}
+		}
+	}
+	input[type="submit"] {
+		color: #fefefe;
+		background: $bright;
+		width: auto;
+		cursor: pointer;
+		padding: 5px 15px;
+		margin-top: 10px;
+		&:hover {
+			background: darken($bright, 10%);
+		}
+		&:active {
+			transition: all 100ms ease;
+			transform: translateY(1px);
+		}
+	}
+	textarea {
+		padding-top: 15px;
+	}
+	.chain {
+		font-size: 0;
+		* {	vertical-align:middle; }
+		span {
+			margin: 0 10px;
+			font-size: 0.8rem;
+			opacity: 0.75;
+		}
+		input {
+			left: 0;
+			position: relative;
+			display: inline;
+		}
+	}
+	.form-error, .form-success {
+		font-size: 0.8em;
+		color: $red;
+		margin-bottom: 10px;
+		&:before {
+			content: "Error:";
+			margin-right: 10px;
+			font-weight: 700;
+		}
+		&:empty {
+			display: none;
+		}
+	}
+	.form-success {
+		color: $green;
+		&:before {
+			content: "Success:";
+		}
+	}
+}

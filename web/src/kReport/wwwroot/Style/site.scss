@@ -1,0 +1,601 @@
+//Default colours
+$background: #111;
+$foreground: #fefefe;
+
+$primary: #28314e;
+$bright: #3f96fc;
+$accent: #33ff81;
+
+$red: #ff5d5d;
+$yellow: #fff257;
+$green: #74ff85;
+
+$font: "Muli";
+
+$placeholders: '::-webkit-input-placeholder' '::-moz-placeholder' ':-mz-input-placeholder' '::placeholder';
+
+@import "forms";
+
+*,
+*:before,
+*:after {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	background: $background;
+	font-family: $font, sans-serif;
+	color: $foreground;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	margin: 0;
+}
+
+h1, h2 {
+	text-shadow: 0 1px 0 #838383, 0 2px 0 #7e7e7e, 0 4px 1px rgba(0,0,0,.1), 0 0 5px rgba(0,0,0,.1),0 0px 3px rgba(0,0,0,.3), 0 1px 5px rgba(0,0,0,.2), 0 3px 10px rgba(0,0,0,.25), 0 3px 10px rgba(0,0,0,0.2), 0 13px 20px rgba(0,0,0,.15);
+}
+
+header#top {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	align-items: center;
+	background: $primary;
+	padding: 5px 15px;
+	box-shadow: 0 0 1px $bright;
+
+	h1 a {
+		color: inherit;
+
+		&:hover {
+			color: inherit;
+		}
+
+		&:active {
+			text-shadow: 0 1px 0 #838383, 0 3px 1px rgba(0,0,0,.1), 0 0 5px rgba(0,0,0,.1),0 -1px 3px rgba(0,0,0,.3), 0 0px 5px rgba(0,0,0,.2), 0 2px 10px rgba(0,0,0,.25), 0 2px 10px rgba(0,0,0,0.2), 0 12px 20px rgba(0,0,0,.15);
+		}
+	}
+
+	h3.right {
+		font-size: 0.9em;
+
+		strong {
+			color: $accent;
+		}
+	}
+
+	> * {
+		padding: 5px;
+	}
+}
+
+header.title {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	padding-bottom: 10px;
+	margin-bottom: 10px;
+	border-bottom: 2px solid $bright;
+	height: 60px;
+	position: relative;
+
+	&::after {
+		position: absolute;
+		content: "";
+		display: block;
+		bottom: -2px;
+		right: 6px;
+		width: 25%;
+		border-bottom: 2px dashed #222;
+	}
+}
+
+//Filter sorcery
+input[type="radio"].radio {
+	//Hide actual radio buttons
+	position: absolute;
+	left: -9999px;
+	//Unhighlight the circular labels that are not selected (inclusive)
+	@each $filter in all mm rep {
+		&#filter-#{$filter}:not(:checked) ~ * label[for=filter-#{$filter}] {
+			&::before {
+				background: $primary;
+			}
+
+			&::after {
+				box-shadow: 0 0 1px #999;
+			}
+		}
+	}
+	//Hide rows that are not the current filter (exclusive)
+	//Remove tbody#entries-filterable for a general CSS-only row filter
+	@each $filter in mm rep {
+		&#filter-#{$filter}:checked ~ * tbody#entries-filterable tr:not(.#{$filter}) {
+			display: none;
+		}
+	}
+}
+
+table#entries {
+	table-layout: fixed;
+	font-size: 0.9em;
+
+	tr {
+		cursor: pointer;
+	}
+
+	@each $name, $color in ( rep: $red, mm: $yellow, und: #bbb ) {
+		tr.entry.#{$name} {
+			border-left: 5px solid $color;
+
+			&:hover, &.selected {
+				background: darken($color, 60%);
+			}
+
+			td:first-child {
+				background: linear-gradient(90deg, darken($color, 40%), transparent 10%);
+			}
+		}
+	}
+}
+
+label.radio {
+	margin-left: 15px;
+	position: relative;
+
+	&::before {
+		content: "";
+		cursor: pointer;
+		position: absolute;
+		width: 25px;
+		height: 25px;
+		top: -2.5px;
+		left: -10px;
+		border-radius: 50%;
+		background: $primary;
+		box-shadow: 0 0 5px 1px #777, inset 1px 1px 10px rgba(0, 0, 0, 0.5);
+		transition: all 100ms ease;
+		z-index: 3;
+	}
+
+	&::after {
+		content: attr(data-label);
+		cursor: pointer;
+		display: inline-block;
+		text-align: center;
+		font-size: 0.6em;
+		text-transform: uppercase;
+		background: $primary;
+		padding: 5px 8px 5px 25px;
+		vertical-align: top;
+		z-index: 2;
+		border-radius: 0 2px 2px 0;
+		transition: all 100ms ease;
+	}
+
+	@each $name, $color in ( red: $red, yellow: $yellow, green: $green ) {
+		&.#{$name} {
+			&::before {
+				background: $color;
+				box-shadow: 0 0 2px 1px $color;
+			}
+
+			&::after {
+				box-shadow: 0 0 2px 1px $color;
+			}
+		}
+	}
+}
+
+nav.horizontal-nav {
+	ul {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		font-size: 0;
+
+		li {
+			font-size: 1rem;
+			margin-right: 0.8em;
+			display: inline-block;
+
+			&.current a {
+				background: $bright;
+			}
+
+			a {
+				padding: 10px;
+				display: block;
+				color: inherit;
+				text-decoration: none;
+				transition: background 250ms ease;
+
+				&:hover {
+					transition: background 100ms ease;
+					background: desaturate($accent, 50%);
+				}
+			}
+		}
+	}
+}
+
+.wrapper {
+	padding: 15px;
+
+	&.multi {
+		display: flex;
+		flex-wrap: wrap;
+	}
+}
+
+.container {
+	background: #222;
+	padding: 15px 20px;
+	margin: 10px auto;
+	box-shadow: 0 0 1px $bright;
+	flex-wrap: wrap;
+	position: relative;
+	width: 50%;
+	min-width: 500px;
+
+	&::after {
+		position: absolute;
+		content: "";
+		left: 0;
+		right: 0;
+		bottom: 0;
+		height: 100px;
+		pointer-events: none;
+		background: linear-gradient(transparent 80%, $primary);
+	}
+
+	&.important:after {
+		$spacing: 5px;
+		border-radius: $spacing;
+		content: "";
+		background: repeating-linear-gradient( 45deg, transparent, transparent 10px, $primary 10px, $primary 20px );
+		top: -$spacing;
+		left: -$spacing;
+		right: -$spacing;
+		height: calc(100% + #{$spacing * 2});
+		position: absolute;
+		z-index: -1;
+	}
+}
+
+table {
+	width: 100%;
+	border-collapse: collapse;
+	background: rgba(0, 0, 0, 0.3);
+	border-top: 1px solid $bright;
+	border-bottom: 1px solid $bright;
+
+	tr {
+		th {
+			background: $primary;
+		}
+
+		th, td {
+			position: relative;
+			-webkit-hyphens: auto;
+			-moz-hyphens: auto;
+			hyphens: auto;
+			word-wrap: break-word;
+			text-align: left;
+			padding: 5px 10px;
+
+			&:first-child {
+				border-left: 1px solid $bright;
+			}
+
+			&:last-child {
+				border-right: 1px solid $bright;
+			}
+		}
+
+		td:empty:after {
+			content: "";
+			position: absolute;
+			display: block;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: repeating-linear-gradient( 45deg, transparent, transparent 10px, rgba(0,0,0,0.2) 10px, rgba(0,0,0,0.2) 20px );
+		}
+	}
+}
+
+a {
+	color: $bright;
+	font-weight: 700;
+	text-decoration: none;
+	display: inline-block;
+	transition: all 250ms ease;
+	outline: none;
+
+	&:hover {
+		transition: all 75ms ease;
+		color: lighten($bright, 10%);
+	}
+
+	&:active, &:focus {
+		transform: translateY(1px);
+	}
+}
+
+button {
+	background: $primary;
+	border: 1px solid $bright;
+	box-shadow: 0 0 3px $bright;
+	padding: 5px 8px;
+	color: #fefefe;
+	font-size: 0.7em;
+	font-weight: 700;
+	cursor: pointer;
+	transition: all 250ms ease;
+	outline: none;
+
+	&:hover {
+		transition: all 100ms ease;
+		background: linear-gradient(darken($bright, 25%), $primary);
+		box-shadow: 0 0 10px $bright;
+	}
+
+	&:active {
+		transition: all 10ms ease;
+		background: linear-gradient(darken($bright, 35%), $primary);
+		box-shadow: 0 0 15px $bright;
+	}
+}
+
+.chat-box {
+	height: 300px;
+	position: fixed;
+	bottom: 0;
+	right: 0;
+	background: #222;
+	border-top: 1px solid $primary;
+	border-left: 1px solid $primary;
+	font-size: 0.8em;
+	color: #bbb;
+
+	&::before {
+		content: "Chat";
+		display: block;
+		background: rgba(0,0,0,0.3);
+		border-bottom: 1px solid #111;
+		color: #999;
+		top: 0;
+		left: 0;
+		right: 0;
+		font-size: 0.9em;
+		padding: 3px 5px;
+		height: 20px;
+	}
+
+	.chat-users {
+		overflow-y: scroll;
+		padding: 5px;
+		height: 100%;
+		width: 100px;
+		display: inline-block;
+		vertical-align: top;
+	}
+
+	.chat-messages {
+		overflow-y: scroll;
+		display: inline-block;
+		padding: 5px;
+		height: 250px;
+		width: 250px;
+
+		.message {
+			margin-bottom: 5px;
+			word-wrap: break-word;
+
+			&::before {
+				content: "(" attr(data-date) ") ";
+			}
+
+			&.system {
+				color: #666;
+				font-size: 0.9em;
+
+				&::before {
+					display: none;
+				}
+			}
+
+			span.author:not(.admin) {
+				opacity: 0.7;
+			}
+
+			span.author.admin {
+				opacity: 1;
+				font-weight: 700;
+				color: $red;
+			}
+		}
+	}
+
+	.chat-users, .chat-messages {
+		position: relative;
+
+		&::-webkit-scrollbar {
+			width: 10px;
+			height: 10px;
+		}
+
+		&::-webkit-scrollbar-thumb {
+			background: rgba(255,255,255,0.2);
+		}
+
+		&::-webkit-scrollbar-track {
+			background: rgba(0,0,0,0.3);
+		}
+	}
+
+	.chat-users .chat-user {
+		margin-bottom: 5px;
+	}
+
+	input {
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		width: 250px;
+		font-size: 1.25em;
+		padding: 5px 8px;
+		height: 30px;
+		color: #bbb;
+		background: #333;
+		border: none;
+		outline: none;
+		border-top: 2px solid transparent;
+		transition: all 100ms ease;
+
+		&:focus {
+			border-color: $bright;
+			background: $primary;
+			box-shadow: 0 0 10px 2px $bright;
+
+			& ~ .chat-extra {
+				height: 20px;
+				filter: none;
+				-webkit-filter: none;
+			}
+		}
+
+		&[disabled] {
+			background: repeating-linear-gradient( 45deg, transparent, transparent 10px, rgba(0,0,0,0.2) 10px, rgba(0,0,0,0.2) 20px );
+
+			@each $sel in $placeholders {
+				&#{$sel}:before {
+					content: "Connecting...";
+					margin-right: 9999px;
+				}
+			}
+		}
+	}
+
+	.chat-extra {
+		position: absolute;
+		bottom: 30px;
+		left: 0;
+		width: 240px;
+		height: 0;
+		pointer-events: none;
+		background: linear-gradient(transparent, $primary);
+		transition: all 100ms ease;
+		filter: grayscale(100%);
+		-webkit-filter: grayscale(100%);
+	}
+}
+
+.errorquote {
+	font-family: "Lucida Console", Monaco, monospace;
+	color: $red;
+	background: darken($red, 60%);
+	border: 1px solid $red;
+	box-shadow: 0 0 5px $red, inset 0 0 10px $red;
+	padding: 10px 15px;
+	line-height: 15px;
+	vertical-align: middle;
+	position: relative;
+
+	&::before, &::after {
+		text-shadow: 0 0 5px $red;
+		font-size: 2em;
+		vertical-align: middle;
+	}
+
+	&::before {
+		content: "«";
+		margin-right: 15px;
+	}
+
+	&::after {
+		content: "»";
+		margin-left: 15px;
+		position: absolute;
+		right: 15px;
+	}
+}
+
+.report-body {
+	font-size: 1.2em;
+}
+
+span.sender, span.target {
+	font-weight: 700;
+}
+
+span.sender {
+	color: $yellow;
+}
+
+span.target {
+	color: $red;
+}
+
+blockquote {
+	margin: 0;
+	border-left: 5px solid $bright;
+	padding: 15px 40px;
+	position: relative;
+	font-size: 2em;
+	font-family: "Patrick Hand", serif;
+
+	&::before, &::after {
+		font-size: 2em;
+		position: absolute;
+		height: 100%;
+		height: .8em;
+		opacity: 0.5;
+	}
+
+	&::before {
+		content: open-quote;
+		top: 0;
+		left: 10px;
+	}
+
+	&::after {
+		content: close-quote;
+		bottom: 0;
+		margin-left: 10px;
+	}
+}
+
+@each $sel in $placeholders {
+	input#{$sel}, textarea#{$sel} {
+		font-size: 0.8em;
+		line-height: 1.5em;
+		opacity: 0.8;
+	}
+}
+
+@media screen and (max-width: 1050px) {
+	.container {
+		width: 100%;
+	}
+}
+
+@media screen and (max-width: 768px) {
+	.chat-box {
+		display: none;
+	}
+}
