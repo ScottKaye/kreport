@@ -34,5 +34,8 @@ namespace kReport.Models
 				_Reason = temp;
 			}
 		}
+
+		[BsonElement("done")]
+		public bool Done { get; set; }
 	}
 }

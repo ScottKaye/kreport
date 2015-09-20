@@ -5,19 +5,22 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>@ViewBag.Title - kReport 1.0</title>
 	<link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon">
-	<link href="http://fonts.googleapis.com/css?family=Muli|Patrick+Hand" rel="stylesheet">
+	<link href="http://fonts.googleapis.com/css?family=Lato:400,700,900" rel="stylesheet">
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/angular-chart.js/0.8.4/angular-chart.min.css" rel="stylesheet" />
 	<link href="~/Style/site.css" rel="stylesheet">
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
 </head>
 <body ng-controller="baseController as base" ng-cloak>
-	<nav class="frozen">
+	<nav>
 		<span class="page-title">
-			<a href="#">kReport</a>
+			<a href="#" ui-sref="index">kReport</a>
 		</span>
 		<ul>
 			<li><a ui-sref="index" ui-sref-active="current">Dashboard</a></li>
-			<li><a ui-sref="admin" ui-sref-active="current">Admin</a></li>
+			@if (Context.User.IsInRole("Admin"))
+			{
+				<li><a ui-sref="admin" ui-sref-active="current">Admin</a></li>
+			}
 		</ul>
 	</nav>
 
@@ -25,30 +28,55 @@
 		<canvas class="cover" id="sparks"></canvas>
 		<div class="main-header-content">
 			<span class="header-title">{{ title }}</span>
-			<div class="flex">
-				<a href="#" class="fancy">Login</a>
-			</div>
+			@if (!Mongo.HasUsers())
+			{
+				<a href="#" ui-sref="start" class="fancy-button">Get Started</a>
+			}
+			else
+			{
+				@if (Model.User == null)
+				{
+					<form class="flex center">
+						<input required type="text" placeholder="Username or Email"
+							   ng-model="base.user.usernameOrEmail" />
+						<input required type="password" placeholder="Password"
+							   ng-model="base.user.password" />
+						<button type="submit" class="fancy-button modest"
+								ng-click="base.login()">
+							Login
+						</button>
+					</form>
+				}
+				else
+				{
+					<a href="/k/Logout" class="fancy-button">Logout</a>
+				}
+			}
 		</div>
 	</header>
 
-	<div class="flex" ui-view></div>
-	<hr>
-	<div class="flex">
-		<div class="chart-container">
-			<header>Reports per Day</header>
-			<canvas class="chart chart-line chart-small" chart-data="[[1,2,3,2,5,4,7,4,4,10,9,8]]" chart-labels="['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']" chart-options="{bezierCurve:false,pointDotRadius:3}"></canvas>
-		</div>
-		<div class="chart-container">
-			<header>Reports per Month</header>
-			<canvas class="chart chart-line chart-small" chart-data="[[6,7,4,6,2,3,5,5,2,3,6,9]]" chart-labels="['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']" chart-options="{bezierCurve:false,pointDotRadius:3}"></canvas>
-		</div>
-		<div class="chart-container">
-			<header>Most Offending Servers</header>
-			
-		</div>
-	</div>
-
 	@RenderBody()
+
+	<div class="main flex" ui-view></div>
+
+	@if (Mongo.HasUsers())
+	{
+		<hr>
+		<div class="flex">
+			<div class="chart-container">
+				<header>This Week</header>
+				<canvas class="chart chart-line" chart-data="base.thisWeek" chart-labels="['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']" chart-options="{bezierCurve:false,pointDotRadius:3}"></canvas>
+			</div>
+			<div class="chart-container">
+				<header>This Year</header>
+				<canvas class="chart chart-line" chart-data="base.thisYear" chart-labels="['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']" chart-options="{bezierCurve:false,pointDotRadius:3}"></canvas>
+			</div>
+			<div class="chart-container">
+				<header>Servers</header>
+				<canvas class="chart chart-bar big" chart-data="base.serverStats" chart-labels="base.serverLabels"></canvas>
+			</div>
+		</div>
+	}
 
 	@if (Context.User.Identity.IsAuthenticated)
 	{
@@ -76,7 +104,7 @@
 				   ng-disabled="!chat.connected">
 			<div class="chat-extra"></div>
 		</div>
-	}
+			}
 
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js"></script>
@@ -86,7 +114,6 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-moment/0.10.3/angular-moment.min.js"></script>
 	<script src="~/Scripts/jquery.signalR-2.2.0.js"></script>
 	<script src="~/signalr/hubs"></script>
-	<script src="~/Scripts/ajax-forms.js"></script>
 	<script src="~/Scripts/kApp.js"></script>
 	<script src="~/Scripts/site.js"></script>
 	@RenderSection("scripts", false)

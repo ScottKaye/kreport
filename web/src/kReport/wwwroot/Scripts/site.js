@@ -1,6 +1,14 @@
 ﻿//site.js: Misc functions used around the site
 //Angular stuff is in kApp.js
 
+//Small library to interact with the querystring, unminified: https://gist.github.com/ScottKaye/e066638ba1e76642e2c9
+(function (c, g) {
+	function f(a) { return Object.keys(a).length ? "?" + Object.keys(a).map(function (d) { return encodeURIComponent(d) + "=" + encodeURIComponent(a[d]) }).join("&") : "" } function e() { var a = f(b); history.replaceState(null, document.title, window.location.pathname + a) } var b = {}; c.getParams = function () { var a = window.location.search.slice(1); if (0 === a.length) return []; a.split("&").forEach(function (a) { a = a.split("="); b[decodeURIComponent(a[0])] = decodeURIComponent(a[1]) }); return b }; c.removeParam = function (a) {
+		delete b[a];
+		e()
+	}; c.removeAllParams = function () { b = {}; e() }; c.getParam = function (a) { return b[a] }; c.setParam = function (a, d) { b = c.getParams(); "object" === typeof d && (d = JSON.stringify(d)); b[a] = d; e() }; b = c.getParams()
+})(window.url = window.url || {});
+
 function toHex(c) {
 	var hex = (+c).toString(16);
 	return hex.length === 1 ? "0" + hex : hex;
@@ -16,13 +24,13 @@ var primary = rgbToHex.apply(null, getComputedStyle(document.body.parentNode).co
 Chart.defaults.global.colours = [primary];
 Chart.defaults.global.scaleFontColor = "#ffffff";
 Chart.defaults.global.responsive = false;
-Chart.defaults.global.bezierCurve = false;	
+Chart.defaults.global.bezierCurve = false;
 
-//Elements with a class of "frozen" will not scroll, and will stay in their original positions
+//Register custom elements
 $(function () {
-	$(window).on("scroll", function () {
-		$(".frozen").css("transform", "translateY(" + window.scrollY + "px)");
-	});
+	document.registerElement("action-panel");
+	document.registerElement("fancy-tooltip");
+	document.registerElement("notification-toast");
 });
 
 //Renders spark/ember-style effect on the header
@@ -76,3 +84,24 @@ $(function () {
 
 	animate();
 });
+
+//Elements with a class of "frozen" will not scroll, and will stay in their original positions
+$(function () {
+	$(window).on("scroll", function () {
+		$(".frozen").css("transform", "translateY(" + window.scrollY + "px)");
+	});
+});
+
+var notif;
+
+function notification(options) {
+	if (!options.message) return;
+	if (notif) notif.remove();
+
+	notif = $("<notification-toast></notification-toast>").text(options.message);
+	if (options.error) notif.addClass("red");
+	$(document.body).append(notif);
+	setTimeout(function () {
+		notif.remove();
+	}, 3000);
+}

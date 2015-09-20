@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.Text.RegularExpressions;
 
 namespace kReport.Infrastructure
 {
@@ -35,6 +36,21 @@ namespace kReport.Infrastructure
 			Startup.RebuildConfiguration();
 			string correctKey = Startup.Configuration.GetSection("kreport:key").Value;
 			return key == correctKey;
+		}
+	}
+
+	//Thank you http://stackoverflow.com/a/38064/382456
+	public static class DateTimeExtensions
+	{
+		public static DateTime StartOfWeek(this DateTime dt, DayOfWeek startOfWeek)
+		{
+			int diff = dt.DayOfWeek - startOfWeek;
+			if (diff < 0)
+			{
+				diff += 7;
+			}
+
+			return dt.AddDays(-1 * diff).Date;
 		}
 	}
 }

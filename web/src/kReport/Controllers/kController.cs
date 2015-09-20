@@ -74,6 +74,24 @@ namespace kReport.Controllers
 		}
 
 		[HttpGet]
+		public int[] GetNumRequestsThisWeek()
+		{
+			return Mongo.GetNumRequestsThisWeek();
+		}
+
+		[HttpGet]
+		public int[] GetNumRequestsThisYear()
+		{
+			return Mongo.GetNumRequestsThisYear();
+		}
+
+		[HttpGet]
+		public dynamic GetServerStats()
+		{
+			return Mongo.GetServerStats();
+		}
+
+		[HttpGet]
 		public void TestHub()
 		{
 			UpdateHub.Test(updateContext);
@@ -145,7 +163,7 @@ namespace kReport.Controllers
 		[HttpPost]
 		public string FirstUser(FirstUserInfo info)
 		{
-			if(info == null)
+			if (info == null)
 			{
 				Response.StatusCode = 400;
 				return "Please fill out all fields.";
@@ -206,7 +224,32 @@ namespace kReport.Controllers
 
 		private void Save(KRequest req)
 		{
+			Mongo.IncrementRequestsToday(req);
 			Mongo.SaveRequest(req);
+		}
+
+		/// <summary>
+		/// Changes a record's "done" attribute
+		/// </summary>
+		/// <param name="ids">IDs of records to change</param>
+		/// <param name="done">True to mark as done, false to mark as not-done</param>
+		[HttpPost]
+		public void Done(string[] ids, bool done)
+		{
+			ObjectId[] oids = StringsToObjectIds(ids);
+			Mongo.Done(oids, done);
+		}
+
+		[HttpPost]
+		public void Delete(string[] ids)
+		{
+			ObjectId[] oids = StringsToObjectIds(ids);
+			Mongo.Delete(oids);
+		}
+
+		private ObjectId[] StringsToObjectIds(string[] ids)
+		{
+			return ids.Select(i => new ObjectId(i)).ToArray();
 		}
 	}
 }
