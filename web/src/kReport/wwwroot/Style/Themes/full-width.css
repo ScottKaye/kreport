@@ -1,0 +1,19 @@
+﻿.flex {
+	max-width: none;
+}
+
+hr {
+	max-width: calc(100vw - 50px);
+}
+
+.entries {
+	display: flex;
+	justify-content: space-between;
+	align-content: flex-start;
+	flex-wrap: wrap;
+}
+
+	.entries.half {
+		width: 50%;
+		max-width: 880px;
+	}
