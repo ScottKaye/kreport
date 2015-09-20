@@ -10,7 +10,7 @@
 				<label class="checkbox">
 					<input type="checkbox" ng-model="req.checked" />
 				</label>
-				<a href="#" am-time-ago="req.Date" title="{{ req.DateString }}"></a>
+				<span am-time-ago="req.Date" title="{{ req.DateString }}"></span>
 			</header>
 			<table class="request-table red"
 				   ng-click="req.checked=!req.checked">
@@ -45,7 +45,7 @@
 				<label class="checkbox">
 					<input type="checkbox" ng-model="req.checked" />
 				</label>
-				<a href="#" am-time-ago="req.Date"></a>
+				<span am-time-ago="req.Date" title="{{ req.DateString }}"></span>
 			</header>
 			<table class="request-table yellow"
 				   ng-click="req.checked=!req.checked">
