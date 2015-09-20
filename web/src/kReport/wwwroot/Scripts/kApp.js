@@ -43,6 +43,7 @@ app.controller("baseController", function ($http, signalR, $scope, $rootScope) {
 
 	var e = this;
 
+	e.kreport = window.kreport;
 	e.request = null;
 	e.requestDetail = null;
 	e.requests = [];
@@ -66,7 +67,10 @@ app.controller("baseController", function ($http, signalR, $scope, $rootScope) {
 		console.log(e.user);
 
 		$http.post("/k/Login", e.user).then(function (response) {
-			window.location = window.location.origin;
+			notification({
+				refresh: true,
+				message: response.data
+			});
 		}, function (response) {
 			notification({
 				message: response.data,
@@ -133,19 +137,18 @@ app.controller("baseController", function ($http, signalR, $scope, $rootScope) {
 		$http.post("k/Delete", {
 			ids: ids
 		}).then(function (response) {
+			e.requests = e.requests.filter(function (c) {
+				return !c.checked;
+			});
 			notification({
 				message: "Request" + (ids.length != 1 ? "s" : "") + " deleted."
 			});
 			e.uncheckAll();
 		}, function (response) {
 			notification({
-				message: "Failed to delete items",
+				message: "Failed to delete items.",
 				error: true
 			});
-		});
-
-		e.requests = e.requests.filter(function (c) {
-			return !c.checked;
 		});
 	};
 
@@ -248,8 +251,11 @@ app.controller("startController", function ($http, $state) {
 			Email: e.Email,
 			Password: e.Password,
 			ConfirmPassword: e.ConfirmPassword
-		}).then(function (response) {
-			window.location = window.location.origin;
+		}).then(function () {
+			notification({
+				refresh: true,
+				message: "First user created.  Welcome, " + user.Email + "!"
+			});
 		}, function (response) {
 			notification({
 				message: response.data,
@@ -259,24 +265,64 @@ app.controller("startController", function ($http, $state) {
 	};
 });
 
-app.controller("adminController", function ($http) {
+app.controller("adminController", function ($http, $window) {
 	"use strict";
 
 	var e = this;
 
+	e.window = $window;
 	e.settings = {};
+	e.users = [];
 
 	e.saveSettings = function () {
 		$http.post("/k/SaveSettings", {
 			settings: JSON.stringify(e.settings)
 		}).then(function (response) {
-			window.location.reload();
+			notification({
+				refresh: true,
+				message: "Saved settings."
+			});
+		});
+	};
+
+	e.saveUser = function (user) {
+		console.log(user, user.delete);
+		$http.post("/k/SaveUser", {
+			id: user.Id,
+			user: user,
+			"delete": user.Delete
+		}).then(function (response) {
+			if (user.Delete) {
+				e.users = e.users.filter(function (c) {
+					return !c.Delete;
+				});
+				notification({
+					message: "Deleted " + (user.Name || user.Email || "the mysterious, faceless user") + "."
+				});
+			}
+			else {
+				if (response.data != null) {
+					user.Id = response.data;
+				}
+				notification({
+					message: "Updated " + (user.Name || user.Email || "the hooded, dark figure with no name") + "."
+				});
+			}
+		}, function (response) {
+			notification({
+				message: "Failed to update user.",
+				error: true
+			});
 		});
 	};
 
 	//Load settings asynchronously to let the server handle security
 	$http.get("/k/GetSettings").then(function (response) {
 		e.settings = response.data;
+	});
+
+	$http.get("/k/GetAllUsers").then(function (response) {
+		e.users = response.data;
 	});
 });
 

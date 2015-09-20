@@ -67,20 +67,34 @@ a {
   a:hover {
     color: #ffcc80; }
 
-input {
+input, button {
   font: inherit;
   background: rgba(0, 0, 0, 0.3);
   color: #eee;
   border: none;
   outline: none;
-  height: 30px;
-  box-shadow: 0 3px 0 #ff9900, 0 0 0 1px rgba(255, 153, 0, 0.3);
+  border-bottom: 2px solid #ff9900;
+  box-shadow: 0 0 0 1px rgba(255, 153, 0, 0.3);
   font-size: 1em;
   padding: 5px 10px;
-  margin: 0 5px;
+  margin: 0;
   transition: all 250ms ease; }
-  input:valid {
+  input:not(:first-child), button:not(:first-child) {
+    margin-left: 5px; }
+  input:valid:not(.fancy-button), button:valid:not(.fancy-button) {
     background: rgba(255, 153, 0, 0.1); }
+    input:valid:not(.fancy-button):hover, button:valid:not(.fancy-button):hover {
+      background: rgba(255, 153, 0, 0.2); }
+  input:hover, button:hover {
+    box-shadow: 0 0 3px 1px #ff9900;
+    background: rgba(0, 0, 0, 0.5); }
+
+button {
+  cursor: pointer; }
+  button:active {
+    transition: all 100ms ease;
+    transform: translateY(2px);
+    border-color: transparent; }
 
 hr {
   border-color: #ff9900;
@@ -164,12 +178,13 @@ fancy-tooltip {
 notification-toast {
   pointer-events: none;
   position: fixed;
-  bottom: 10px;
+  top: 10px;
   right: 10px;
   background: #111;
   padding: 10px 15px;
   box-shadow: 0 2px 0 #00ff99;
-  animation: toast 3s ease; }
+  animation: toast 3s ease;
+  z-index: 99999; }
   notification-toast.red {
     box-shadow: 0 2px 0 #ff3333; }
 
@@ -238,7 +253,6 @@ p.lead {
     position: relative;
     padding: 50px 10px;
     max-width: 800px;
-    max-height: 250px;
     margin: 0 auto;
     overflow: hidden; }
   .main-header .header-title {
@@ -264,8 +278,8 @@ p.lead {
     text-transform: uppercase;
     font-size: 1.2em;
     font-weight: 700;
-    padding: 0 0 5px 20px;
-    box-shadow: -5px 0 0 #ff9900;
+    padding: 0 0 5px 8px;
+    box-shadow: -2px 0 0 #ff9900;
     transform: translateX(-7px);
     position: relative; }
     .entries .entries-title::after {
@@ -274,15 +288,15 @@ p.lead {
       left: 0;
       bottom: 0;
       height: 2px;
-      width: 10px;
+      width: 5px;
       background: #ff9900;
       transition: width 500ms ease; }
     .entries .entries-title.red {
-      box-shadow: -5px 0 0 #ff3333; }
+      box-shadow: -2px 0 0 #ff3333; }
       .entries .entries-title.red::after {
         background: #ff3333; }
     .entries .entries-title.yellow {
-      box-shadow: -5px 0 0 #ffff00; }
+      box-shadow: -2px 0 0 #ffff00; }
       .entries .entries-title.yellow::after {
         background: #ffff00; }
   .entries article {
@@ -356,19 +370,22 @@ table.request-table {
   background: rgba(0, 0, 0, 0.1);
   margin-top: 10px; }
   table.request-table th, table.request-table td {
-    padding: 5px 10px; }
+    padding: 5px 15px;
+    text-align: left; }
     table.request-table th:first-child, table.request-table td:first-child {
-      box-shadow: inset 5px 0 0 #ff9900; }
+      box-shadow: inset 2px 0 0 #ff9900; }
   table.request-table.red th:first-child, table.request-table.red td:first-child {
-    box-shadow: inset 5px 0 0 #ff3333; }
+    box-shadow: inset 2px 0 0 #ff3333; }
   table.request-table.yellow th:first-child, table.request-table.yellow td:first-child {
-    box-shadow: inset 5px 0 0 #ffff00; }
+    box-shadow: inset 2px 0 0 #ffff00; }
 
 label.checkbox {
   display: inline-block;
   height: 20px;
   transform: translateX(-30px) translateY(3px);
   position: relative; }
+  label.checkbox.inline {
+    transform: none; }
   label.checkbox input[type=checkbox] {
     box-shadow: none;
     position: absolute;
@@ -412,6 +429,11 @@ label.checkbox {
       background: #ff9900;
       color: #222;
       content: "\2713"; }
+    label.checkbox input[type=checkbox].red::before {
+      background: #ff3333; }
+    label.checkbox input[type=checkbox].red:checked::after {
+      box-shadow: 0 0 5px #ff3333;
+      background: #ff3333; }
 
 .box-container header {
   padding-left: 10px;
@@ -523,7 +545,7 @@ label.checkbox {
 
 @keyframes toast {
   0% {
-    transform: translateY(50px);
+    transform: translateY(-50px);
     opacity: 0; }
   10% {
     transform: none;
@@ -532,7 +554,7 @@ label.checkbox {
     transform: none;
     opacity: 1; }
   100% {
-    transform: translateY(10px);
+    transform: translateY(-10px);
     opacity: 0; } }
 
 ::-webkit-scrollbar {

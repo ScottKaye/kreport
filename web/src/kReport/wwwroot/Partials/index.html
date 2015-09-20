@@ -7,7 +7,7 @@
 				 ng-click="base.request = req"
 				 ng-class="{done:req.Done}">
 			<header>
-				<label class="checkbox">
+				<label class="checkbox" ng-show="base.kreport.authenticated">
 					<input type="checkbox" ng-model="req.checked" />
 				</label>
 				<span am-time-ago="req.Date" title="{{ req.DateString }}"></span>
@@ -42,7 +42,7 @@
 				 ng-click="base.request = req"
 				 ng-class="{done:req.Done}">
 			<header>
-				<label class="checkbox">
+				<label class="checkbox" ng-show="base.kreport.authenticated">
 					<input type="checkbox" ng-model="req.checked" />
 				</label>
 				<span am-time-ago="req.Date" title="{{ req.DateString }}"></span>

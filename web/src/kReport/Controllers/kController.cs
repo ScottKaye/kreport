@@ -93,21 +93,74 @@ namespace kReport.Controllers
 		}
 
 		[HttpGet]
+		public List<kUser> GetAllUsers()
+		{
+			if (Context.User.IsInRole("Admin"))
+			{
+				return Mongo.GetAllUsers()
+					.Select(u =>
+					{
+						u.Password = null;
+						return u;
+					}).ToList();
+			}
+			return null;
+		}
+
+		[HttpGet]
 		public dynamic GetSettings()
 		{
-			return Mongo.GetSettings();
+			if (Context.User.IsInRole("Admin"))
+			{
+				return Mongo.GetSettings();
+			}
+			return null;
 		}
 
 		[HttpPost]
 		public void SaveSettings(string settings)
 		{
-			Mongo.SaveSettings(JsonConvert.DeserializeObject(settings));
+			if (Context.User.IsInRole("Admin"))
+			{
+				Mongo.SaveSettings(JsonConvert.DeserializeObject(settings));
+			}
+		}
+
+		[HttpPost]
+		public string SaveUser(string id, kUser user, bool delete)
+		{
+			if (Context.User.IsInRole("Admin"))
+			{
+				//Get ObjectId for new or existing user
+				if (id == null) user.Id = ObjectId.GenerateNewId();
+				else user.Id = ObjectId.Parse(id);
+
+				if (delete)
+				{
+					Mongo.DeleteUser(user);
+					return null;
+				}
+				else
+				{
+					if (user.Email == null)
+					{
+						Response.StatusCode = 400;
+						return null;
+					}
+					Mongo.SaveUser(user);
+					return user.Id.ToString();
+				}
+			}
+			return null;
 		}
 
 		[HttpGet]
 		public void TestHub()
 		{
-			UpdateHub.Test(updateContext);
+			if (Context.User.IsInRole("Admin"))
+			{
+				UpdateHub.Test(updateContext);
+			}
 		}
 
 		[HttpGet]
@@ -128,6 +181,7 @@ namespace kReport.Controllers
 		public string Login(LoginUserInfo info)
 		{
 			kUser user;
+			bool passwordSet = false;
 
 			try
 			{
@@ -140,6 +194,14 @@ namespace kReport.Controllers
 				{
 					//Log in with username
 					user = Mongo.GetUserByName(info.UsernameOrEmail);
+				}
+
+				//If the password is null, the password the user entered is their new password
+				if (info.Password != null && user.Password == null)
+				{
+					user.Password = PasswordHash.CreateHash(info.Password);
+					Mongo.UpdatePassword(user);
+					passwordSet = true;
 				}
 
 				if (!PasswordHash.ValidatePassword(info.Password, user.Password))
@@ -160,10 +222,15 @@ namespace kReport.Controllers
 			var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 			Context.Authentication.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
 
-			string welcomeBack = user.GetName();
-
 			Response.StatusCode = 200;
-			return "Welcome back, " + welcomeBack + "!";
+			if (passwordSet)
+			{
+				return "Your password has been set, " + user.GetName() + ".";
+			}
+			else
+			{
+				return "Welcome back, " + user.GetName() + "!";
+			}
 		}
 
 		[HttpGet]
@@ -176,16 +243,16 @@ namespace kReport.Controllers
 		[HttpPost]
 		public string FirstUser(FirstUserInfo info)
 		{
-			if (info == null)
-			{
-				Response.StatusCode = 400;
-				return "Please fill out all fields.";
-			}
-
 			if (Mongo.HasUsers())
 			{
 				Response.StatusCode = 400;
 				return "A user already exists in the database.";
+			}
+
+			if (info == null)
+			{
+				Response.StatusCode = 400;
+				return "Please fill out all fields.";
 			}
 
 			if (info.Password != info.ConfirmPassword)
@@ -250,15 +317,21 @@ namespace kReport.Controllers
 		[HttpPost]
 		public void Done(string[] ids, bool done)
 		{
-			ObjectId[] oids = StringsToObjectIds(ids);
-			Mongo.Done(oids, done);
+			if (Context.User.Identity.IsAuthenticated)
+			{
+				ObjectId[] oids = StringsToObjectIds(ids);
+				Mongo.Done(oids, done);
+			}
 		}
 
 		[HttpPost]
 		public void Delete(string[] ids)
 		{
-			ObjectId[] oids = StringsToObjectIds(ids);
-			Mongo.Delete(oids);
+			if (Context.User.IsInRole("Admin"))
+			{
+				ObjectId[] oids = StringsToObjectIds(ids);
+				Mongo.Delete(oids);
+			}
 		}
 
 		private ObjectId[] StringsToObjectIds(string[] ids)

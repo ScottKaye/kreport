@@ -105,21 +105,44 @@ a {
 	}
 }
 
-input {
+input, button {
 	font: inherit;
 	background: rgba(0,0,0,0.3);
 	color: $fg;
 	border: none;
 	outline: none;
-	height: 30px;
-	box-shadow: 0 3px 0 $primary, 0 0 0 1px transparentize($primary, 0.7);
+	border-bottom: 2px solid $primary;
+	box-shadow: 0 0 0 1px transparentize($primary, 0.7);
 	font-size: 1em;
 	padding: 5px 10px;
-	margin: 0 5px;
+	margin: 0;
 	transition: all 250ms ease;
 
-	&:valid {
+	&:not(:first-child) {
+		margin-left: 5px;
+	}
+
+	&:valid:not(.fancy-button) {
 		background: transparentize($primary, 0.9);
+
+		&:hover {
+			background: transparentize($primary, 0.8);
+		}
+	}
+
+	&:hover {
+		box-shadow: 0 0 3px 1px $primary;
+		background: rgba(0,0,0,0.5);
+	}
+}
+
+button {
+	cursor: pointer;
+
+	&:active {
+		transition: all 100ms ease;
+		transform: translateY(2px);
+		border-color: transparent;
 	}
 }
 
@@ -236,12 +259,13 @@ fancy-tooltip {
 notification-toast {
 	pointer-events: none;
 	position: fixed;
-	bottom: 10px;
+	top: 10px;
 	right: 10px;
 	background: #111;
 	padding: 10px 15px;
 	box-shadow: 0 2px 0 $green;
 	animation: toast 3s ease;
+	z-index: $max;
 
 	&.red {
 		box-shadow: 0 2px 0 $red;
@@ -338,7 +362,6 @@ p.lead {
 		position: relative;
 		padding: 50px 10px;
 		max-width: 800px; //Not affected by $width
-		max-height: 250px;
 		margin: 0 auto;
 		overflow: hidden;
 	}
@@ -382,8 +405,8 @@ p.lead {
 		text-transform: uppercase;
 		font-size: 1.2em;
 		font-weight: 700;
-		padding: 0 0 5px 20px;
-		box-shadow: -5px 0 0 $primary;
+		padding: 0 0 5px 8px;
+		box-shadow: -2px 0 0 $primary;
 		transform: translateX(-7px);
 		position: relative;
 
@@ -393,13 +416,13 @@ p.lead {
 			left: 0;
 			bottom: 0;
 			height: 2px;
-			width: 10px;
+			width: 5px;
 			background: $primary;
 			transition: width 500ms ease;
 		}
 
 		&.red {
-			box-shadow: -5px 0 0 $red;
+			box-shadow: -2px 0 0 $red;
 
 			&::after {
 				background: $red;
@@ -407,7 +430,7 @@ p.lead {
 		}
 
 		&.yellow {
-			box-shadow: -5px 0 0 $yellow;
+			box-shadow: -2px 0 0 $yellow;
 
 			&::after {
 				background: $yellow;
@@ -473,22 +496,23 @@ table.request-table {
 	margin-top: 10px;
 
 	th, td {
-		padding: 5px 10px;
+		padding: 5px 15px;
+		text-align: left;
 
 		&:first-child {
-			box-shadow: inset 5px 0 0 $primary;
+			box-shadow: inset 2px 0 0 $primary;
 		}
 	}
 
 	&.red {
 		th:first-child, td:first-child {
-			box-shadow: inset 5px 0 0 $red;
+			box-shadow: inset 2px 0 0 $red;
 		}
 	}
 
 	&.yellow {
 		th:first-child, td:first-child {
-			box-shadow: inset 5px 0 0 $yellow;
+			box-shadow: inset 2px 0 0 $yellow;
 		}
 	}
 }
@@ -498,6 +522,10 @@ label.checkbox {
 	height: 20px;
 	transform: translateX(-30px) translateY(3px);
 	position: relative;
+
+	&.inline {
+		transform: none;
+	}
 
 	input[type=checkbox] {
 		box-shadow: none;
@@ -550,6 +578,17 @@ label.checkbox {
 				background: $primary;
 				color: $bg;
 				content: "\2713";
+			}
+		}
+
+		&.red {
+			&::before {
+				background: $red;
+			}
+
+			&:checked::after {
+				box-shadow: 0 0 5px $red;
+				background: $red;
 			}
 		}
 	}
@@ -723,7 +762,7 @@ label.checkbox {
 
 @keyframes toast {
 	0% {
-		transform: translateY(50px);
+		transform: translateY(-50px);
 		opacity: 0;
 	}
 
@@ -738,7 +777,7 @@ label.checkbox {
 	}
 
 	100% {
-		transform: translateY(10px);
+		transform: translateY(-10px);
 		opacity: 0;
 	}
 }

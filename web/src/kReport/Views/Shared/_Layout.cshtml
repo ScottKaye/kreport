@@ -71,9 +71,9 @@
 				@if (Model.User == null)
 				{
 					<form class="flex center">
-						<input required type="text" placeholder="Username or Email"
+						<input type="text" placeholder="Username or Email"
 							   ng-model="base.user.usernameOrEmail" />
-						<input required type="password" placeholder="Password"
+						<input type="password" placeholder="Password"
 							   ng-model="base.user.password" />
 						<button type="submit" class="fancy-button modest"
 								ng-click="base.login()">
@@ -83,7 +83,7 @@
 				}
 				else
 				{
-					<p class="lead" style="margin-bottom:30px">Welcome back, @Model.User.GetName()</p>
+					<p class="lead" style="margin-bottom:30px">@Model.RandomGreeting, @(Model.User.GetName()).</p>
 					<a href="/k/Logout" class="fancy-button">Logout</a>
 				}
 			}
@@ -122,6 +122,14 @@
 			<div class="chat-extra"></div>
 		</div>
 	}
+
+	<script>
+		window.kreport = {
+			authenticated: @Context.User.Identity.IsAuthenticated.ToString().ToLower(),
+			admin: @Context.User.IsInRole("Admin").ToString().ToLower(),
+			id: "@(Model.User != null ? Model.User.Id : null)"
+		};
+	</script>
 
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js"></script>

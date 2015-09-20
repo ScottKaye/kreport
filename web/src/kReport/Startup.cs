@@ -49,6 +49,12 @@ namespace kReport
 			services.AddSession();
 			services.AddCaching();
 			services.AddSignalR();
+
+			services.Configure<AuthorizationOptions>(options =>
+			{
+				options.AddPolicy("Admin", new AuthorizationPolicyBuilder().RequireClaim("Admin", "Allowed").Build());
+				options.AddPolicy("User", new AuthorizationPolicyBuilder().RequireClaim("User", "Allowed").Build());
+			});
 		}
 
 		public void Configure(IApplicationBuilder app, IHostingEnvironment env)
@@ -73,7 +79,8 @@ namespace kReport
 				context.Response.Headers.Add("Access-Control-Allow-Methods", new[] { "*" });
 				return next();
 			});
-			app.UseCookieAuthentication(options => {
+			app.UseCookieAuthentication(options =>
+			{
 				options.AutomaticAuthentication = true;
 				options.LoginPath = "/Admin/Login";
 			});

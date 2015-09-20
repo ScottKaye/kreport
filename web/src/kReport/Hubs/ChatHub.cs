@@ -47,14 +47,15 @@ namespace kReport.Models
 
 		public override Task OnConnected()
 		{
-			var principal = (ClaimsPrincipal)Context.User;
-			kUser user = Mongo.GetUserById(principal.FindFirst(ClaimTypes.NameIdentifier).Value);
-			ChatUser chatUser;
-
 			try
 			{
+				var principal = (ClaimsPrincipal)Context.User;
+				var id = principal.FindFirst(ClaimTypes.NameIdentifier).Value;
+                kUser user = Mongo.GetUserById(id);
+				ChatUser chatUser;
+
 				//Use existing user if already present in the Users ConcurrentDictionary
-				if (!Users.TryGetValue(user.GetName(), out chatUser))
+				if (!Users.TryGetValue(id, out chatUser))
 				{
 					chatUser = new ChatUser(user);
 				}
@@ -62,7 +63,7 @@ namespace kReport.Models
 				chatUser.Connections.Add(Context.ConnectionId);
 
 				int beforeCount = Users.Count;
-				Users.AddOrUpdate(chatUser.Name, chatUser, (oldkey, oldvalue) => chatUser);
+				Users.AddOrUpdate(id, chatUser, (oldkey, oldvalue) => chatUser);
 
 				//Only show a connection message if the user is newly joining
 				//Do not show a connection message if they just duplicated the tab/opened in a new page
@@ -73,7 +74,7 @@ namespace kReport.Models
 
 				Clients.All.updateUsers(Users);
 			}
-			catch { }
+			catch {}
 
 			return base.OnConnected();
 		}
@@ -85,23 +86,7 @@ namespace kReport.Models
 				ChatUser user = Users.Values.Where(u => u.Connections.Contains(Context.ConnectionId)).Single();
 				user.Connections.Remove(Context.ConnectionId);
 
-				//If the user closed their last connection
-				if (user.Connections.Count == 0)
-				{
-					//Delay actually disconnecting the user by 5 seconds in case they rejoin quickly
-					new System.Threading.Timer(obj =>
-					{
-						//If user still has no connections
-						if (user.Connections.Count == 0)
-						{
-							ChatUser garbage;
-							Users.TryRemove(user.Name, out garbage);
-
-							SendSystemMessage(user.Name + " disconnected.");
-							Clients.All.updateUsers(Users);
-						}
-					}, null, 5000, System.Threading.Timeout.Infinite);
-				}
+				Clients.All.updateUsers(Users);
 			}
 			catch { }
 

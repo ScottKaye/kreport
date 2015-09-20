@@ -18,8 +18,60 @@
 	<section class="entries">
 		<header class="entries-title">Manage</header>
 		<article>
-			<header>Admins</header>
-			TODO
+			<header>Users</header>
+			<small>Some changes require users to log out to take effect.</small>
+			<form ng-repeat="user in admin.users">
+				<table class="request-table">
+					<tr>
+						<th>Name</th>
+						<td>
+							<input type="text" placeholder="Name"
+								   ng-model="user.Name" />
+						</td>
+					</tr>
+					<tr>
+						<th>Email</th>
+						<td>
+							<input required type="email" placeholder="Name"
+								   ng-model="user.Email" />
+						</td>
+					</tr>
+					<tr>
+						<th>Admin</th>
+						<td>
+							<label class="checkbox inline">
+								<input type="checkbox" ng-model="user.Admin"
+									   ng-disabled="user.Id == admin.window.kreport.id" />
+							</label>
+						</td>
+					</tr>
+					<tr ng-show="user.Id != admin.window.kreport.id">
+						<th>Delete</th>
+						<td>
+							<fancy-tooltip>
+								<label class="checkbox inline">
+									<input type="checkbox" class="red"
+										   ng-model="user.Delete" />
+								</label>
+								<span><strong>Permanently</strong> delete this user from the database.</span>
+							</fancy-tooltip>
+						</td>
+					</tr>
+					<tr>
+						<td>&nbsp;</td>
+						<td>
+							<button type="submit"
+									ng-click="admin.saveUser(user)">
+								Save
+							</button>
+						</td>
+					</tr>
+				</table>
+			</form>
+			<fancy-tooltip>
+				<button ng-click="admin.users.push({})">Create User</button>
+				<span>The user will be asked for a password when they first log in.</span>
+			</fancy-tooltip>
 		</article>
 	</section>
 </div>

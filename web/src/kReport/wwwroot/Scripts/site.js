@@ -103,6 +103,13 @@ function notification(options) {
 	if (!options.message) return;
 	if (notif) notif.remove();
 
+	if (options.refresh) {
+		options.refresh = false;
+		localStorage.notification = JSON.stringify(options);
+		window.location.reload();
+		return;
+	}
+
 	clearTimeout(notif_timeout);
 
 	notif = $("<notification-toast></notification-toast>").text(options.message);
@@ -112,3 +119,11 @@ function notification(options) {
 		notif.remove();
 	}, 3000);
 }
+
+$(function () {
+	if (localStorage.notification) {
+		var options = JSON.parse(localStorage.notification);
+		localStorage.removeItem("notification");
+		notification(options);
+	}
+});

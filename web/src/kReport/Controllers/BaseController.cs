@@ -3,13 +3,23 @@ using Microsoft.AspNet.Mvc;
 using kReport.Models;
 using Microsoft.AspNet.Mvc.Filters;
 using System.Security.Claims;
+using System;
 
 namespace kReport.Controllers
 {
 	public class Viewmodel
 	{
+		private string[] Greetings = new string[] { "Hey", "Hi", "Sup", "Hello", "Welcome back" };
 		public kUser User { get; set; }
 		public string[] Themes { get; set; }
+		public string RandomGreeting
+		{
+			get
+			{
+				int index = new Random().Next(Greetings.Length);
+				return Greetings[index];
+			}
+		}
 	}
 
 	public class BaseController : Controller

@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using kReport.Infrastructure;
 using System.Dynamic;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace kReport.Models
 {
@@ -20,9 +21,10 @@ namespace kReport.Models
 			try
 			{
 				Client.GetServer().Ping();
-                return true;
+				return true;
 			}
-			catch {
+			catch
+			{
 				return false;
 			}
 		}
@@ -40,6 +42,17 @@ namespace kReport.Models
 		{
 			var query = Query<kRequest>.EQ(e => e.Id, id);
 			return Db.GetCollection<kRequest>("requests").FindOne(query);
+		}
+
+		internal static List<kUser> GetAllUsers()
+		{
+			var users = Db.GetCollection<kUser>("users").FindAll();
+			List<kUser> result = new List<kUser>();
+
+			result.AddRange(users.Where(u => u.Admin).OrderBy(u => u.Name));
+			result.AddRange(users.Where(u => !u.Admin).OrderBy(u => u.Name));
+
+			return result;
 		}
 
 		internal static int[] GetNumRequestsThisWeek()
@@ -130,7 +143,34 @@ namespace kReport.Models
 					Upsert = true,
 					Update = Update.Set("themes", new BsonArray(enabled))
 				});
-            }
+			}
+		}
+
+		internal static void SaveUser(kUser user)
+		{
+			Db.GetCollection<kUser>("users").FindAndModify(new FindAndModifyArgs
+			{
+				Upsert = true,
+				Query = Query.EQ("_id", user.Id),
+				Update = Update.Set("Name", user.Name ?? "").Set("Email", user.Email ?? "").Set("Admin", user.Admin)
+			});
+		}
+
+		internal static void UpdatePassword(kUser user)
+		{
+			Db.GetCollection<kUser>("users").FindAndModify(new FindAndModifyArgs
+			{
+				Query = Query.EQ("_id", user.Id),
+				Update = Update.Set("Password", user.Password)
+			});
+		}
+
+		internal static void DeleteUser(kUser user)
+		{
+			Db.GetCollection<kUser>("users").FindAndRemove(new FindAndRemoveArgs
+			{
+				Query = Query.EQ("_id", user.Id)
+			});
 		}
 
 		internal static void SaveRequest(kRequest request)
@@ -218,7 +258,8 @@ namespace kReport.Models
 
 		internal static kUser GetUserByName(string name)
 		{
-			var query = Query<kUser>.EQ(u => u.Name.ToLower(), name.ToLower());
+			var regex = new BsonRegularExpression(new Regex("^" + name + "$", RegexOptions.IgnoreCase));
+			var query = Query<kUser>.Matches(u => u.Name, regex);
 			return Db.GetCollection<kUser>("users").FindOne(query);
 		}
 
