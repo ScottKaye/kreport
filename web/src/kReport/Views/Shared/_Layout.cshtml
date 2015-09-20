@@ -3,11 +3,17 @@
 <head>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>@ViewBag.Title - kReport 1.0</title>
+	<title>{{ title }} - kReport 1.0</title>
 	<link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon">
 	<link href="http://fonts.googleapis.com/css?family=Lato:400,700,900" rel="stylesheet">
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/angular-chart.js/0.8.4/angular-chart.min.css" rel="stylesheet" />
 	<link href="~/Style/site.css" rel="stylesheet">
+	@{
+		foreach (var theme in Model.Themes)
+		{
+			<link href="@theme" rel="stylesheet" />
+		}
+	}
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
 </head>
 <body ng-controller="baseController as base" ng-cloak>
@@ -49,6 +55,7 @@
 				}
 				else
 				{
+					<p class="lead" style="margin-bottom:30px">Welcome back, @Model.User.GetName()</p>
 					<a href="/k/Logout" class="fancy-button">Logout</a>
 				}
 			}
@@ -57,26 +64,7 @@
 
 	@RenderBody()
 
-	<div class="main flex" ui-view></div>
-
-	@if (Mongo.HasUsers())
-	{
-		<hr>
-		<div class="flex">
-			<div class="chart-container">
-				<header>This Week</header>
-				<canvas class="chart chart-line" chart-data="base.thisWeek" chart-labels="['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']" chart-options="{bezierCurve:false,pointDotRadius:3}"></canvas>
-			</div>
-			<div class="chart-container">
-				<header>This Year</header>
-				<canvas class="chart chart-line" chart-data="base.thisYear" chart-labels="['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']" chart-options="{bezierCurve:false,pointDotRadius:3}"></canvas>
-			</div>
-			<div class="chart-container">
-				<header>Servers</header>
-				<canvas class="chart chart-bar big" chart-data="base.serverStats" chart-labels="base.serverLabels"></canvas>
-			</div>
-		</div>
-	}
+	<div class="main" ui-view></div>
 
 	@if (Context.User.Identity.IsAuthenticated)
 	{

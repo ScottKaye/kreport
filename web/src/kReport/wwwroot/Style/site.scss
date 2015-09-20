@@ -7,6 +7,7 @@ $blue: #6699ff; //pharmacy blue
 $primary: $orange;
 $fg: #eee;
 $bg: #222;
+
 $width: 1000px;
 
 $max: 99999;
@@ -81,6 +82,9 @@ ul:not(.ul) {
 	margin: 0;
 	padding: 0;
 	list-style: none;
+	li:not(:last-child) {
+		margin-bottom: 5px;
+	}
 }
 
 a {
@@ -115,11 +119,18 @@ input {
 hr {
 	border-color: $primary;
 	margin: 25px auto;
-	max-width: $width;
+
+	@if $width != 'auto' {
+		max-width: $width;
+	}
+	@else {
+		max-width: calc(100vw - 50px);
+	}
 }
 
 form {
 	margin: 25px 0;
+
 	fieldset {
 		@extend .chart;
 		border: none;
@@ -232,8 +243,11 @@ notification-toast {
 	display: flex;
 	flex-wrap: wrap;
 	justify-content: space-around;
-	max-width: $width;
 	margin: 0 auto;
+
+	@if $width != 'auto' {
+		max-width: $width;
+	}
 
 	&.center {
 		justify-content: center;
@@ -248,13 +262,18 @@ notification-toast {
 	padding: 0 15px;
 }
 
-.full {
-	width: $width;
-}
-
 p.lead {
 	font-size: 1.1em;
 	font-weight: 700;
+}
+
+.container {
+	width: 100%;
+}
+
+.content {
+	max-width: 800px;
+	margin: 0 auto;
 }
 
 .main-header {
@@ -316,9 +335,20 @@ p.lead {
 
 .entries {
 	padding: 10px;
-	max-width: $width;
 	margin: 0 auto;
 	text-shadow: 0 2px 3px #000;
+
+	@if $width != 'auto' {
+		max-width: $width;
+	}
+	@else {
+		display: flex;
+		justify-content: space-between;
+		align-content: flex-start;
+		flex-wrap: wrap;
+		width: 50%;
+		max-width: 880px;
+	}
 
 	&:hover .entries-title::after {
 		width: 100%;
@@ -326,6 +356,7 @@ p.lead {
 	}
 
 	.entries-title {
+		width: 100%;
 		text-transform: uppercase;
 		font-size: 1.2em;
 		font-weight: 700;
@@ -363,7 +394,7 @@ p.lead {
 	}
 
 	article {
-		min-width: 400px;
+		width: 400px;
 		font-size: 0.9em;
 		padding: 10px;
 		opacity: 0;
@@ -502,7 +533,7 @@ label.checkbox {
 	}
 }
 
-.chart-container {
+.box-container {
 	header {
 		padding-left: 10px;
 		text-transform: uppercase;
@@ -511,16 +542,16 @@ label.checkbox {
 	}
 }
 
-.chart {
+.box {
 	box-shadow: 0 0 0 1px rgba(255,255,255,0.1);
 	background: rgba(0,0,0,0.25);
 	padding: 10px;
 	margin: 15px 0;
-	width: $width / 2.5;
+	width: 300px;
 	max-width: 70vw;
 
 	&.big {
-		width: $width - 100px;
+		width: 800px;
 	}
 }
 

@@ -6,6 +6,7 @@ using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.SignalR;
 using Microsoft.AspNet.SignalR.Infrastructure;
 using MongoDB.Bson;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -58,12 +59,12 @@ namespace kReport.Controllers
 		}
 
 		[HttpGet]
-		public IEnumerable<KRequest> GetAllRequests()
+		public IEnumerable<kRequest> GetAllRequests()
 		{
 			return Mongo.GetAllRequests().AsEnumerable();
 		}
 
-		public KRequest GetRequestById(string id)
+		public kRequest GetRequestById(string id)
 		{
 			ObjectId objid;
 			if (ObjectId.TryParse(id, out objid))
@@ -89,6 +90,18 @@ namespace kReport.Controllers
 		public dynamic GetServerStats()
 		{
 			return Mongo.GetServerStats();
+		}
+
+		[HttpGet]
+		public dynamic GetSettings()
+		{
+			return Mongo.GetSettings();
+		}
+
+		[HttpPost]
+		public void SaveSettings(string settings)
+		{
+			Mongo.SaveSettings(JsonConvert.DeserializeObject(settings));
 		}
 
 		[HttpGet]
@@ -182,6 +195,7 @@ namespace kReport.Controllers
 			}
 
 			kUser user = new kUser();
+			user.Admin = true;
 			user.Email = info.Email;
 			user.Password = PasswordHash.CreateHash(info.Password);
 
@@ -197,7 +211,7 @@ namespace kReport.Controllers
 		}
 
 		// Plugin-facing APIs
-		// POST k/Report?KRequest.Sender.Name=Kredit&KRequest.Sender.ID3=U:1:49061560&Key=testkey etc
+		// POST k/Report?kRequest.Sender.Name=Kredit&kRequest.Sender.ID3=U:1:49061560&Key=testkey etc
 		[HttpPost]
 		public void Report(ApiReport req)
 		{
@@ -222,7 +236,7 @@ namespace kReport.Controllers
 			else Response.StatusCode = 412;
 		}
 
-		private void Save(KRequest req)
+		private void Save(kRequest req)
 		{
 			Mongo.IncrementRequestsToday(req);
 			Mongo.SaveRequest(req);

@@ -1,90 +1,108 @@
-﻿<h3 ng-hide="base.requests.length">No requests have been made yet, or everything is completed.</h3>
+﻿<div class="flex">
+	<h3 ng-hide="base.requests.length">No requests have been made yet, or everything is completed.</h3>
 
-<section class="entries" ng-init="base.getAllRequests()" ng-show="(base.requests | filter:{Abbreviation:'rep'}).length">
-	<header class="entries-title red">Reports</header>
-	<article ng-repeat="req in base.requests | filter:{Abbreviation:'rep'} | reverse"
-			 ng-click="base.request = req"
-			 ng-class="{done:req.Done}">
+	<section class="entries" ng-init="base.getAllRequests()" ng-show="(base.requests | filter:{Abbreviation:'rep'}).length">
+		<header class="entries-title red">Reports</header>
+		<article ng-repeat="req in base.requests | filter:{Abbreviation:'rep'} | reverse"
+				 ng-click="base.request = req"
+				 ng-class="{done:req.Done}">
+			<header>
+				<label class="checkbox">
+					<input type="checkbox" ng-model="req.checked" />
+				</label>
+				<a href="#" am-time-ago="req.Date" title="{{ req.DateString }}"></a>
+			</header>
+			<table class="request-table red"
+				   ng-click="req.checked=!req.checked">
+				<tr>
+					<th>Target</th>
+					<td>{{ req.Target.Name }}</td>
+				</tr>
+				<tr>
+					<th>Sender</th>
+					<td>{{ req.Sender.Name }}</td>
+				</tr>
+				<tr ng-show="req.Reason.length">
+					<th>Reason</th>
+					<td>{{ req.Reason }}</td>
+				</tr>
+				<tr>
+					<th>Server</th>
+					<td>
+						<a href="steam://connect/{{ req.Server.IP }}">{{ req.Server.Name }}</a>
+					</td>
+				</tr>
+			</table>
+		</article>
+	</section>
+
+	<section class="entries" ng-show="(base.requests | filter:{Abbreviation:'mm'}).length">
+		<header class="entries-title yellow">Middleman Requests</header>
+		<article ng-repeat="req in base.requests | filter:{Abbreviation:'mm'} | reverse"
+				 ng-click="base.request = req"
+				 ng-class="{done:req.Done}">
+			<header>
+				<label class="checkbox">
+					<input type="checkbox" ng-model="req.checked" />
+				</label>
+				<a href="#" am-time-ago="req.Date"></a>
+			</header>
+			<table class="request-table yellow"
+				   ng-click="req.checked=!req.checked">
+				<tr>
+					<th>Sender</th>
+					<td>{{ req.Sender.Name }}</td>
+				</tr>
+				<tr ng-show="req.Reason.length">
+					<th>Reason</th>
+					<td>{{ req.Reason }}</td>
+				</tr>
+				<tr>
+					<th>Server</th>
+					<td>
+						<a href="steam://connect/{{ req.Server.IP }}">{{ req.Server.Name }}</a>
+					</td>
+				</tr>
+			</table>
+		</article>
+	</section>
+
+	<action-panel ng-class="{visible:(base.requests | filter:{checked:true}).length}">
 		<header>
-			<label class="checkbox">
-				<input type="checkbox" ng-model="req.checked" />
-			</label>
-			<a href="#" am-time-ago="req.Date" title="{{ req.DateString }}"></a>
+			Actions
+			<small>With selected</small>
 		</header>
-		<table class="request-table red"
-			   ng-click="req.checked=!req.checked">
-			<tr>
-				<th>Target</th>
-				<td>{{ req.Target.Name }}</td>
-			</tr>
-			<tr>
-				<th>Sender</th>
-				<td>{{ req.Sender.Name }}</td>
-			</tr>
-			<tr ng-show="req.Reason.length">
-				<th>Reason</th>
-				<td>{{ req.Reason }}</td>
-			</tr>
-			<tr>
-				<th>Server</th>
-				<td>
-					<a href="steam://connect/{{ req.Server.IP }}">{{ req.Server.Name }}</a>
-				</td>
-			</tr>
-		</table>
-	</article>
-</section>
+		<div class="action-panel-content">
+			<fancy-tooltip>
+				<button class="fancy-button modest green" ng-click="base.checkedDone(true)">Done</button>
+				<span>This request has been dealt with.</span>
+			</fancy-tooltip>
+			<fancy-tooltip>
+				<button class="fancy-button modest" ng-click="base.checkedDone(false)">Not Done</button>
+				<span>This request still needs action to be taken.</span>
+			</fancy-tooltip>
+			<button class="fancy-button modest" ng-click="base.uncheckAll()">Cancel</button>
+			<fancy-tooltip class="right">
+				<button class="fancy-button modest red" ng-click="base.checkedDelete()">Delete</button>
+				<span><strong>Permanently</strong> delete this request.  This does not affect the totals displayed in analytics.</span>
+			</fancy-tooltip>
+		</div>
+	</action-panel>
+</div>
 
-<section class="entries" ng-show="(base.requests | filter:{Abbreviation:'mm'}).length">
-	<header class="entries-title yellow">Middleman Requests</header>
+<hr>
 
-	<article ng-repeat="req in base.requests | filter:{Abbreviation:'mm'} | reverse"
-			 ng-click="base.request = req"
-			 ng-class="{done:req.Done}">
-		<header>
-			<label class="checkbox">
-				<input type="checkbox" ng-model="req.checked" />
-			</label>
-			<a href="#" am-time-ago="req.Date"></a>
-		</header>
-		<table class="request-table yellow"
-			   ng-click="req.checked=!req.checked">
-			<tr>
-				<th>Sender</th>
-				<td>{{ req.Sender.Name }}</td>
-			</tr>
-			<tr ng-show="req.Reason.length">
-				<th>Reason</th>
-				<td>{{ req.Reason }}</td>
-			</tr>
-			<tr>
-				<th>Server</th>
-				<td>
-					<a href="steam://connect/{{ req.Server.IP }}">{{ req.Server.Name }}</a>
-				</td>
-			</tr>
-		</table>
-	</article>
-</section>
-
-<action-panel ng-class="{visible:(base.requests | filter:{checked:true}).length}">
-	<header>
-		Actions
-		<small>With selected</small>
-	</header>
-	<div class="action-panel-content">
-		<fancy-tooltip>
-			<button class="fancy-button modest green" ng-click="base.checkedDone(true)">Done</button>
-			<span>This request has been dealt with.</span>
-		</fancy-tooltip>
-		<fancy-tooltip>
-			<button class="fancy-button modest" ng-click="base.checkedDone(false)">Not Done</button>
-			<span>This request still needs action to be taken.</span>
-		</fancy-tooltip>
-		<button class="fancy-button modest" ng-click="base.uncheckAll()">Cancel</button>
-		<fancy-tooltip class="right">
-			<button class="fancy-button modest red" ng-click="base.checkedDelete()">Delete</button>
-			<span><strong>Permanently</strong> delete this request.  This does not affect the totals displayed in analytics.</span>
-		</fancy-tooltip>
+<div class="flex">
+	<div class="box-container">
+		<header>This Week</header>
+		<canvas class="box chart chart-line" chart-data="base.thisWeek" chart-labels="['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']" chart-options="{bezierCurve:false,pointDotRadius:3}"></canvas>
 	</div>
-</action-panel>
+	<div class="box-container">
+		<header>This Year</header>
+		<canvas class="box chart chart-line" chart-data="base.thisYear" chart-labels="['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']" chart-options="{bezierCurve:false,pointDotRadius:3}"></canvas>
+	</div>
+	<div class="box-container">
+		<header>Servers</header>
+		<canvas class="box chart chart-bar big" chart-data="base.serverStats" chart-labels="base.serverLabels"></canvas>
+	</div>
+</div>

@@ -7,7 +7,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace kReport.Models
 {
-	public class Report : KRequest
+	public class Report : kRequest
 	{
 		public override string Abbreviation
 		{

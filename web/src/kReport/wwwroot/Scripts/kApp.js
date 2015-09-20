@@ -66,9 +66,7 @@ app.controller("baseController", function ($http, signalR, $scope, $rootScope) {
 		console.log(e.user);
 
 		$http.post("/k/Login", e.user).then(function (response) {
-			notification({
-				message: response.data
-			});
+			window.location = window.location.origin;
 		}, function (response) {
 			notification({
 				message: response.data,
@@ -115,7 +113,7 @@ app.controller("baseController", function ($http, signalR, $scope, $rootScope) {
 			notification({
 				message: done ? "Marked as done." : "Unmarked as done."
 			});
-			uncheckAll();
+			e.uncheckAll();
 		}, function (response) {
 			notification({
 				message: "Failed to change mark.",
@@ -135,10 +133,15 @@ app.controller("baseController", function ($http, signalR, $scope, $rootScope) {
 		$http.post("k/Delete", {
 			ids: ids
 		}).then(function (response) {
-			notification("Request" + (ids.length != 1 ? "s" : "") + " deleted.");
-			uncheckAll();
+			notification({
+				message: "Request" + (ids.length != 1 ? "s" : "") + " deleted."
+			});
+			e.uncheckAll();
 		}, function (response) {
-
+			notification({
+				message: "Failed to delete items",
+				error: true
+			});
 		});
 
 		e.requests = e.requests.filter(function (c) {
@@ -166,6 +169,7 @@ app.controller("baseController", function ($http, signalR, $scope, $rootScope) {
 
 //Small emitter to encapsulate global SignalR stuff
 app.factory("signalR", function ($rootScope) {
+	"use strict";
 
 	var hub = $.connection.Update;
 
@@ -184,6 +188,8 @@ app.factory("signalR", function ($rootScope) {
 
 //The chat controller has it's own SignalR instance, and is kept here because.
 app.controller("chatController", function ($http, $scope) {
+	"use strict";
+
 	var e = this;
 	var hub = $.connection.Chat;
 
@@ -229,6 +235,8 @@ app.controller("chatController", function ($http, $scope) {
 });
 
 app.controller("startController", function ($http, $state) {
+	"use strict";
+
 	var e = this;
 
 	e.Email;
@@ -249,6 +257,27 @@ app.controller("startController", function ($http, $state) {
 			});
 		});
 	};
+});
+
+app.controller("adminController", function ($http) {
+	"use strict";
+
+	var e = this;
+
+	e.settings = {};
+
+	e.saveSettings = function () {
+		$http.post("/k/SaveSettings", {
+			settings: JSON.stringify(e.settings)
+		}).then(function (response) {
+			console.log(response.data);
+		});
+	};
+
+	//Load settings asynchronously to let the server handle security
+	$http.get("/k/GetSettings").then(function (response) {
+		e.settings = response.data;
+	});
 });
 
 //Used for ng-repeat to reverse the order items are displayed

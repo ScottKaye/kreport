@@ -1,43 +1,49 @@
-﻿<div class="full">
-	<p class="lead">Thanks for installing kReport!  kReport couldn't find any users in the database, so you need to create one to begin.</p>
-	<p>The first user is perhaps the most important one &ndash; with it, you can add other users to the system.  It's important to <strong>remember the information you enter</strong> in the following form, or kReport might need to be reset to regain access.  This is the only user you <strong>must</strong> create; other users can be configured later.</p>
-	<p>This form only gathers the necessities.  Other information can be provided through the settings page once you're in.</p>
-</div>
+﻿<div class="flex">
+	<div class="container">
+		<div class="content">
+			<p class="lead">Thanks for installing kReport!  kReport couldn't find any users in the database, so you need to create one to begin.</p>
+			<p>The first user is perhaps the most important one &ndash; with it, you can add other users to the system.  It's important to <strong>remember the information you enter</strong> in the following form, or kReport might need to be reset to regain access.  This is the only user you <strong>must</strong> create; other users can be configured later.</p>
+			<p>This form only gathers the necessities.  Other information can be provided through the settings page once you're in.</p>
+		</div>
+	</div>
 
-<form class="chart-container" ng-controller="startController as start">
-	<header>
-		Create first user
-	</header>
-	<fieldset>
-		<table>
-			<tr>
-				<td><label for="login-email">Email</label></td>
-				<td>
-					<input id="login-email" type="email" placeholder="Email" required maxlength="100"
-						   ng-model="start.Email">
-				</td>
-			</tr>
-			<tr>
-				<td><label for="login-password">Password</label></td>
-				<td>
-					<input id="login-password" type="password" placeholder="Password" required maxlength="100"
-						   ng-model="start.Password">
-				</td>
-			</tr>
-			<tr>
-				<td><label for="login-cpassword">Confirm password</label></td>
-				<td>
-					<input id="login-cpassword" type="password" placeholder="Confirm password" required maxlength="100"
-						   ng-model="start.ConfirmPassword">
-				</td>
-			</tr>
-			<tr>
-				<td>&nbsp;</td>
-				<td>
-					<button type="submit" class="fancy-button modest"
-							ng-click="start.create()">Create</button>
-				</td>
-			</tr>
-		</table>
-	</fieldset>
-</form>
+	<form class="box-container" ng-controller="startController as start">
+		<header>
+			Create first user
+		</header>
+		<fieldset>
+			<table>
+				<tr>
+					<td><label for="login-email">Email</label></td>
+					<td>
+						<input id="login-email" type="email" placeholder="Email" required maxlength="100"
+							   ng-model="start.Email">
+					</td>
+				</tr>
+				<tr>
+					<td><label for="login-password">Password</label></td>
+					<td>
+						<input id="login-password" type="password" placeholder="Password" required maxlength="100"
+							   ng-model="start.Password">
+					</td>
+				</tr>
+				<tr>
+					<td><label for="login-cpassword">Confirm password</label></td>
+					<td>
+						<input id="login-cpassword" type="password" placeholder="Confirm password" required maxlength="100"
+							   ng-model="start.ConfirmPassword">
+					</td>
+				</tr>
+				<tr>
+					<td>&nbsp;</td>
+					<td>
+						<button type="submit" class="fancy-button modest"
+								ng-click="start.create()">
+							Create
+						</button>
+					</td>
+				</tr>
+			</table>
+		</fieldset>
+	</form>
+</div>

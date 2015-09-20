@@ -52,6 +52,8 @@ ul:not(.ul) {
   margin: 0;
   padding: 0;
   list-style: none; }
+  ul:not(.ul) li:not(:last-child) {
+    margin-bottom: 5px; }
 
 a {
   text-decoration: none;
@@ -169,8 +171,8 @@ notification-toast {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-around;
-  max-width: 1000px;
-  margin: 0 auto; }
+  margin: 0 auto;
+  max-width: 1000px; }
   .flex.center {
     justify-content: center; }
 
@@ -180,12 +182,16 @@ notification-toast {
 .main {
   padding: 0 15px; }
 
-.full {
-  width: 1000px; }
-
 p.lead {
   font-size: 1.1em;
   font-weight: 700; }
+
+.container {
+  width: 100%; }
+
+.content {
+  max-width: 800px;
+  margin: 0 auto; }
 
 .main-header {
   background-image: url(../Media/wood.jpg);
@@ -231,13 +237,14 @@ p.lead {
 
 .entries {
   padding: 10px;
-  max-width: 1000px;
   margin: 0 auto;
-  text-shadow: 0 2px 3px #000; }
+  text-shadow: 0 2px 3px #000;
+  max-width: 1000px; }
   .entries:hover .entries-title::after {
     width: 100%;
     transition: width 250ms ease; }
   .entries .entries-title {
+    width: 100%;
     text-transform: uppercase;
     font-size: 1.2em;
     font-weight: 700;
@@ -263,7 +270,7 @@ p.lead {
       .entries .entries-title.yellow::after {
         background: #ffff00; }
   .entries article {
-    min-width: 400px;
+    width: 400px;
     font-size: 0.9em;
     padding: 10px;
     opacity: 0;
@@ -390,21 +397,21 @@ label.checkbox {
       color: #222;
       content: "\2713"; }
 
-.chart-container header {
+.box-container header {
   padding-left: 10px;
   text-transform: uppercase;
   font-weight: 700;
   line-height: 0.5em; }
 
-.chart, form fieldset {
+.box {
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
   background: rgba(0, 0, 0, 0.25);
   padding: 10px;
   margin: 15px 0;
-  width: 400px;
+  width: 300px;
   max-width: 70vw; }
-  .chart.big, form fieldset.big {
-    width: 900px; }
+  .box.big {
+    width: 800px; }
 
 .fancy-button {
   margin: 20px;

@@ -12,7 +12,7 @@ namespace kReport.Hubs
 			context.Clients.All.test();
 		}
 
-		public static void NewRequest(IHubContext context, KRequest request)
+		public static void NewRequest(IHubContext context, kRequest request)
 		{
 			context.Clients.All.newRequest(request);
 		}

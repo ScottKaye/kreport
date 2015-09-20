@@ -1,19 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using Microsoft.AspNet.Mvc;
-using kReport.Infrastructure;
 using kReport.Models;
 using Microsoft.AspNet.Mvc.Filters;
-using Microsoft.Framework.Internal;
-using MongoDB.Bson;
 using System.Security.Claims;
-
-// For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace kReport.Controllers
 {
+	public class Viewmodel
+	{
+		public kUser User { get; set; }
+		public string[] Themes { get; set; }
+	}
+
 	public class BaseController : Controller
 	{
 		public Viewmodel model { get; set; }
@@ -33,6 +31,15 @@ namespace kReport.Controllers
 				model.User = user;
 			}
 			catch { model.User = null; }
+
+			//Get themes
+			List<string> themes = new List<string>();
+			foreach (var theme in Mongo.GetEnabledThemes())
+			{
+				string file = Url.Content("~/Style/Themes/" + theme + ".css");
+				themes.Add(file);
+			}
+			model.Themes = themes.ToArray();
 
 			base.OnActionExecuting(context);
 		}

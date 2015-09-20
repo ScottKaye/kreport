@@ -36,6 +36,10 @@ $(function () {
 //Renders spark/ember-style effect on the header
 $(function () {
 	var canvas = document.getElementById("sparks");
+
+	//Don't bother rendering anything if the canvas has been hidden
+	if (!$(canvas).is(":visible")) return;
+
 	var w = +getComputedStyle(canvas).width.match(/\d+/g);
 	var h = +getComputedStyle(canvas).height.match(/\d+/g);
 	canvas.width = w;
@@ -93,15 +97,18 @@ $(function () {
 });
 
 var notif;
+var notif_timeout;
 
 function notification(options) {
 	if (!options.message) return;
 	if (notif) notif.remove();
 
+	clearTimeout(notif_timeout);
+
 	notif = $("<notification-toast></notification-toast>").text(options.message);
 	if (options.error) notif.addClass("red");
 	$(document.body).append(notif);
-	setTimeout(function () {
+	notif_timeout = setTimeout(function () {
 		notif.remove();
 	}, 3000);
 }

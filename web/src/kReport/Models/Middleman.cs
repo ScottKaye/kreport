@@ -4,7 +4,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace kReport.Models
 {
-	public class Middleman : KRequest
+	public class Middleman : kRequest
 	{
 		public override string Abbreviation
 		{

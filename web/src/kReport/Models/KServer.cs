@@ -3,7 +3,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace kReport.Models
 {
-	public class Server
+	public class kServer
     {
 		[BsonElement("ip")]
 		public string IP { get; set; }

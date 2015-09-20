@@ -5,12 +5,12 @@ using System;
 
 namespace kReport.Models
 {
-	public abstract class KRequest
+	public abstract class kRequest
 	{
 		private string _Reason;
 
 		[BsonElement("server")]
-		public Server Server { get; set; }
+		public kServer Server { get; set; }
 
 		[BsonElement("_id")]
 		public ObjectId Id { get; set; }

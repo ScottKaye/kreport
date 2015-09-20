@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using kReport.Infrastructure;
 using System.Dynamic;
+using System.IO;
 
 namespace kReport.Models
 {
@@ -14,19 +15,19 @@ namespace kReport.Models
 		internal static MongoClient Client { get; set; }
 		internal static MongoDatabase Db { get; set; }
 
-		internal static IQueryable<KRequest> GetAllRequests()
+		internal static IQueryable<kRequest> GetAllRequests()
 		{
-			return Db.GetCollection<KRequest>("requests")
+			return Db.GetCollection<kRequest>("requests")
 				.FindAll()
 				.SetLimit(50)
 				.SetSortOrder(SortBy.Ascending("_id"))
 				.AsQueryable();
 		}
 
-		internal static KRequest GetRequestById(ObjectId id)
+		internal static kRequest GetRequestById(ObjectId id)
 		{
-			var query = Query<KRequest>.EQ(e => e.Id, id);
-			return Db.GetCollection<KRequest>("requests").FindOne(query);
+			var query = Query<kRequest>.EQ(e => e.Id, id);
+			return Db.GetCollection<kRequest>("requests").FindOne(query);
 		}
 
 		internal static int[] GetNumRequestsThisWeek()
@@ -82,7 +83,45 @@ namespace kReport.Models
 			return obj;
 		}
 
-		internal static void SaveRequest(KRequest request)
+		internal static dynamic GetSettings()
+		{
+			dynamic obj = new ExpandoObject();
+			var enabledThemes = GetEnabledThemes();
+
+			obj.Themes = Directory
+				.EnumerateFiles(Startup.AppBasePath + "/wwwroot/Style/Themes", "*.css", SearchOption.TopDirectoryOnly)
+				.Select(Path.GetFileNameWithoutExtension).Select(t => new
+				{
+					Name = t,
+					Enabled = enabledThemes.Contains(t)
+				});
+
+			return obj;
+		}
+
+		internal static void SaveSettings(dynamic settings)
+		{
+			if (settings.Themes != null)
+			{
+				List<string> enabled = new List<string>();
+				foreach (var theme in settings.Themes)
+				{
+					if ((bool)theme.Enabled)
+					{
+						enabled.Add((string)theme.Name);
+					}
+				}
+
+				Db.GetCollection("settings").FindAndModify(new FindAndModifyArgs
+				{
+					Query = Query.EQ("_id", 1),
+					Upsert = true,
+					Update = Update.Set("themes", new BsonArray(enabled))
+				});
+            }
+		}
+
+		internal static void SaveRequest(kRequest request)
 		{
 			if (request != null)
 			{
@@ -98,7 +137,7 @@ namespace kReport.Models
 		/// <summary>
 		/// Used to count how many requests happen per day
 		/// </summary>
-		internal static void IncrementRequestsToday(KRequest req)
+		internal static void IncrementRequestsToday(kRequest req)
 		{
 			//Update requests for today
 			Db.GetCollection("trackers").FindAndModify(new FindAndModifyArgs
@@ -124,7 +163,7 @@ namespace kReport.Models
 		{
 			foreach (ObjectId id in ids)
 			{
-				Db.GetCollection<KRequest>("requests").FindAndModify(new FindAndModifyArgs
+				Db.GetCollection<kRequest>("requests").FindAndModify(new FindAndModifyArgs
 				{
 					Query = Query.EQ("_id", id),
 					Update = Update.Set("done", done)
@@ -136,7 +175,7 @@ namespace kReport.Models
 		{
 			foreach (ObjectId id in ids)
 			{
-				Db.GetCollection<KRequest>("requests").FindAndRemove(new FindAndRemoveArgs
+				Db.GetCollection<kRequest>("requests").FindAndRemove(new FindAndRemoveArgs
 				{
 					Query = Query.EQ("_id", id)
 				});
@@ -169,6 +208,16 @@ namespace kReport.Models
 		{
 			var query = Query<kUser>.EQ(u => u.Name.ToLower(), name.ToLower());
 			return Db.GetCollection<kUser>("users").FindOne(query);
+		}
+
+		public static BsonArray GetEnabledThemes()
+		{
+			var settings = Db.GetCollection("settings").FindOne(Query.EQ("_id", 1));
+			if (settings != null)
+			{
+				return settings.GetValue("themes").AsBsonArray;
+			}
+			else return null;
 		}
 
 		internal static void AddUser(kUser user)

@@ -1,1 +1,25 @@
-﻿admin
+﻿<div class="flex" ng-controller="adminController as admin">
+	<section class="entries">
+		<header class="entries-title">Settings</header>
+		<article>
+			<header>Stylesheet Adjustments</header>
+			<ul>
+				<li ng-repeat="theme in admin.settings.Themes">
+					<label class="checkbox">
+						<input type="checkbox"
+							   ng-model="theme.Enabled"
+							   ng-change="admin.saveSettings()" />
+					</label>
+					{{ theme.Name }}
+				</li>
+			</ul>
+		</article>
+	</section>
+	<section class="entries">
+		<header class="entries-title">Manage</header>
+		<article>
+			<header>Admins</header>
+			TODO
+		</article>
+	</section>
+</div>
