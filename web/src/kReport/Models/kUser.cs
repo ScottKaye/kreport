@@ -1,12 +1,11 @@
 ﻿using MongoDB.Bson;
 using System;
-using System.Security.Principal;
 
 namespace kReport.Models
 {
 	[Serializable]
-    public class kUser
-    {
+	public class kUser
+	{
 		public ObjectId Id { get; set; }
 		public string Name { get; set; }
 		public string Email { get; set; }

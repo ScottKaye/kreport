@@ -1,6 +1,4 @@
-﻿using kReport.Infrastructure;
-using kReport.Models;
-using Microsoft.AspNet.Mvc;
+﻿using Microsoft.AspNet.Mvc;
 
 namespace kReport.Controllers
 {

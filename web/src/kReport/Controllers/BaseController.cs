@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using kReport.Models;
 using Microsoft.AspNet.Mvc;
-using kReport.Models;
 using Microsoft.AspNet.Mvc.Filters;
-using System.Security.Claims;
 using System;
+using System.Collections.Generic;
+using System.Security.Claims;
 
 namespace kReport.Controllers
 {
@@ -12,6 +12,7 @@ namespace kReport.Controllers
 		private string[] Greetings = new string[] { "Hey", "Hi", "Sup", "Hello", "Welcome back" };
 		public kUser User { get; set; }
 		public string[] Themes { get; set; }
+
 		public string RandomGreeting
 		{
 			get

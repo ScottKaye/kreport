@@ -51,7 +51,7 @@ namespace kReport.Models
 			{
 				var principal = (ClaimsPrincipal)Context.User;
 				var id = principal.FindFirst(ClaimTypes.NameIdentifier).Value;
-                kUser user = Mongo.GetUserById(id);
+				kUser user = Mongo.GetUserById(id);
 				ChatUser chatUser;
 
 				//Use existing user if already present in the Users ConcurrentDictionary
@@ -74,7 +74,7 @@ namespace kReport.Models
 
 				Clients.All.updateUsers(Users);
 			}
-			catch {}
+			catch { }
 
 			return base.OnConnected();
 		}

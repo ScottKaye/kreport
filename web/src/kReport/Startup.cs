@@ -1,19 +1,13 @@
 ﻿using kReport.Models;
+using Microsoft.AspNet.Authorization;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Diagnostics.Entity;
 using Microsoft.AspNet.Hosting;
+using Microsoft.Dnx.Runtime;
 using Microsoft.Framework.Configuration;
 using Microsoft.Framework.DependencyInjection;
-using Microsoft.Dnx.Runtime;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
-using Microsoft.AspNet.Authorization;
-using Microsoft.AspNet.Identity.EntityFramework;
-using Microsoft.AspNet.SignalR;
-using Microsoft.AspNet.Authentication;
-using Microsoft.AspNet.Authentication.Cookies;
-using System.Security.Claims;
-using Microsoft.AspNet.Http;
 
 namespace kReport
 {

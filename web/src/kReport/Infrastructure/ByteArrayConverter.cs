@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Threading.Tasks;
 
 namespace kReport.Infrastructure
 {
 	// Thank you, http://stackoverflow.com/a/10502856/382456
 	public static class ByteArrayConverter
-    {
+	{
 		/// <summary>
 		/// Serializes any object into a byte array, with metadata.  Not particularily efficient, but it wins in terms of simplicity.
 		/// </summary>

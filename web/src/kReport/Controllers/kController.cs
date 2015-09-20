@@ -166,7 +166,6 @@ namespace kReport.Controllers
 		[HttpGet]
 		public void TestPush()
 		{
-
 		}
 
 		// Returns a 202 Accepted to tell the mobile app that this is a kReport server

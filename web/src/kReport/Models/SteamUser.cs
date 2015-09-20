@@ -8,7 +8,9 @@ namespace kReport.Models
 
 		//Get these values with https://sm.alliedmods.net/new-api/clients/GetClientAuthId
 		public string ID3 { get; set; }
+
 		public string CommunityID { get; set; }
+
 		public string Name
 		{
 			get { return _Name; }

@@ -1,8 +1,4 @@
-﻿using System;
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
-
-namespace kReport.Models
+﻿namespace kReport.Models
 {
 	public class Middleman : kRequest
 	{

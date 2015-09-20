@@ -5,8 +5,8 @@ using Microsoft.AspNet.SignalR.Hubs;
 namespace kReport.Hubs
 {
 	[HubName("Update")]
-    public class UpdateHub : Hub
-    {
+	public class UpdateHub : Hub
+	{
 		public static void Test(IHubContext context)
 		{
 			context.Clients.All.test();
