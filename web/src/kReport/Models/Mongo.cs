@@ -15,6 +15,18 @@ namespace kReport.Models
 		internal static MongoClient Client { get; set; }
 		internal static MongoDatabase Db { get; set; }
 
+		public static bool IsConnected()
+		{
+			try
+			{
+				Client.GetServer().Ping();
+                return true;
+			}
+			catch {
+				return false;
+			}
+		}
+
 		internal static IQueryable<kRequest> GetAllRequests()
 		{
 			return Db.GetCollection<kRequest>("requests")

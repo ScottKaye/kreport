@@ -10,7 +10,12 @@ $bg: #222;
 
 $width: 1000px;
 
+$placeholders: '::-webkit-input-placeholder' '::-moz-placeholder' ':-mz-input-placeholder' '::placeholder';
 $max: 99999;
+
+*, *:before, *:after {
+	box-sizing: border-box;
+}
 
 html {
 	color: $primary; //expose primary colour to Javascript
@@ -55,6 +60,7 @@ nav {
 
 		li {
 			position: relative;
+			margin-bottom: 0 !important;
 
 			a {
 				padding: 0 20px;
@@ -82,6 +88,7 @@ ul:not(.ul) {
 	margin: 0;
 	padding: 0;
 	list-style: none;
+
 	li:not(:last-child) {
 		margin-bottom: 5px;
 	}
@@ -164,6 +171,7 @@ action-panel {
 	align-items: center;
 	transform: translateY(100%);
 	transition: all 250ms ease;
+	z-index: $max;
 
 	&.visible {
 		transform: none;
@@ -177,7 +185,7 @@ action-panel {
 		font-weight: 700;
 		font-size: 1.2em;
 		padding: 15px 20px;
-		width: 5%;
+		width: 6%;
 		min-width: 100px;
 
 		small {
@@ -189,7 +197,7 @@ action-panel {
 
 	.action-panel-content {
 		padding: 5px 10px;
-		width: 95%;
+		width: 94%;
 	}
 }
 
@@ -203,6 +211,7 @@ fancy-tooltip {
 	}
 
 	> span {
+		pointer-events: none;
 		position: absolute;
 		display: block;
 		top: -50px;
@@ -237,6 +246,15 @@ notification-toast {
 	&.red {
 		box-shadow: 0 2px 0 $red;
 	}
+}
+
+code {
+	font-family: monospace;
+	font-size: 1.2em;
+	background: rgba(0,0,0,0.5);
+	padding: 3px 5px;
+	margin: 0 5px;
+	box-shadow: 0 0 1px $primary;
 }
 
 .flex {
@@ -285,6 +303,10 @@ p.lead {
 	text-shadow: 0 5px 15px #000;
 	position: relative;
 
+	&.top {
+		margin-top: 0;
+	}
+
 	&.small {
 		.main-header-content {
 			max-height: 50px;
@@ -316,7 +338,7 @@ p.lead {
 		position: relative;
 		padding: 50px 10px;
 		max-width: 800px; //Not affected by $width
-		max-height: 200px;
+		max-height: 250px;
 		margin: 0 auto;
 		overflow: hidden;
 	}
@@ -747,3 +769,6 @@ label.checkbox {
 		}
 	}
 }
+
+//Imports
+@import "chat";

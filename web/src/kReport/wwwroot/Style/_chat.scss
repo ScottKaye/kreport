@@ -1,0 +1,149 @@
+﻿.chat-box {
+	height: 300px;
+	position: fixed;
+	bottom: 0;
+	right: 0;
+	background: #222;
+	box-shadow: 0 0 0 1px transparentize($primary, 0.7);
+	font-size: 0.8em;
+	color: #bbb;
+	transition: all 250ms ease;
+
+	&::before {
+		content: "Chat";
+		display: block;
+		background: rgba(0,0,0,0.3);
+		border-bottom: 1px solid #111;
+		color: #999;
+		top: 0;
+		left: 0;
+		right: 0;
+		font-size: 0.9em;
+		padding: 3px 5px;
+		height: 20px;
+	}
+
+	&.raised {
+		transform: translateY(-66px);
+	}
+
+	.chat-users {
+		overflow-y: scroll;
+		padding: 5px;
+		height: 100%;
+		width: 100px;
+		display: inline-block;
+		vertical-align: top;
+	}
+
+	.chat-messages {
+		overflow-y: scroll;
+		display: inline-block;
+		padding: 5px;
+		height: 250px;
+		width: 250px;
+
+		.message {
+			margin-bottom: 5px;
+			word-wrap: break-word;
+
+			&::before {
+				content: "(" attr(data-date) ") ";
+			}
+
+			&.system {
+				color: #666;
+				font-size: 0.9em;
+
+				&::before {
+					display: none;
+				}
+			}
+
+			span.author:not(.admin) {
+				opacity: 0.7;
+			}
+
+			span.author.admin {
+				opacity: 1;
+				font-weight: 700;
+				color: $red;
+			}
+		}
+	}
+
+	.chat-users, .chat-messages {
+		position: relative;
+
+		&::-webkit-scrollbar {
+			width: 10px;
+			height: 10px;
+		}
+
+		&::-webkit-scrollbar-thumb {
+			background: rgba(255,255,255,0.2);
+		}
+
+		&::-webkit-scrollbar-track {
+			background: rgba(0,0,0,0.3);
+		}
+	}
+
+	.chat-users .chat-user {
+		margin-bottom: 5px;
+	}
+
+	input {
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		width: 250px;
+		font-size: 1em;
+		padding: 5px 8px;
+		margin: 0;
+		height: 30px;
+		color: #bbb;
+		background: #333;
+		border: none;
+		outline: none;
+		border-top: 2px solid transparent;
+		transition: all 100ms ease;
+
+		&:focus {
+			border-color: $primary; //bright
+			background: transparentize($primary, 0.9);
+			box-shadow: 0 0 10px 2px $primary; //bright
+
+			& ~ .chat-extra {
+				height: 20px;
+				filter: none;
+				-webkit-filter: none;
+			}
+		}
+
+		&[disabled] {
+			background: repeating-linear-gradient( 45deg, transparent, transparent 10px, rgba(0,0,0,0.2) 10px, rgba(0,0,0,0.2) 20px );
+
+			@each $sel in $placeholders {
+				&#{$sel}:before {
+					content: "Connecting...";
+					margin-right: 9999px;
+				}
+			}
+		}
+	}
+
+	.chat-extra {
+		position: absolute;
+		bottom: 30px;
+		left: 0;
+		width: 240px;
+		height: 0;
+		pointer-events: none;
+		background: linear-gradient(transparent, $primary);
+		transition: all 100ms ease;
+		filter: grayscale(100%);
+		opacity: 0.25;
+		-webkit-filter: grayscale(100%);
+	}
+}

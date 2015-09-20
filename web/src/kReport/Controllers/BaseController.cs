@@ -23,23 +23,26 @@ namespace kReport.Controllers
 
 		public override void OnActionExecuting(ActionExecutingContext context)
 		{
-			//Try to get current user
-			try
+			if (Mongo.IsConnected())
 			{
-				string id = Context.User.FindFirst(ClaimTypes.NameIdentifier).Value;
-				kUser user = Mongo.GetUserById(id);
-				model.User = user;
-			}
-			catch { model.User = null; }
+				//Try to get current user
+				try
+				{
+					string id = Context.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+					kUser user = Mongo.GetUserById(id);
+					model.User = user;
+				}
+				catch { model.User = null; }
 
-			//Get themes
-			List<string> themes = new List<string>();
-			foreach (var theme in Mongo.GetEnabledThemes())
-			{
-				string file = Url.Content("~/Style/Themes/" + theme + ".css");
-				themes.Add(file);
+				//Get themes
+				List<string> themes = new List<string>();
+				foreach (var theme in Mongo.GetEnabledThemes())
+				{
+					string file = Url.Content("~/Style/Themes/" + theme + ".css");
+					themes.Add(file);
+				}
+				model.Themes = themes.ToArray();
 			}
-			model.Themes = themes.ToArray();
 
 			base.OnActionExecuting(context);
 		}

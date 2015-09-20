@@ -270,7 +270,7 @@ app.controller("adminController", function ($http) {
 		$http.post("/k/SaveSettings", {
 			settings: JSON.stringify(e.settings)
 		}).then(function (response) {
-			console.log(response.data);
+			window.location.reload();
 		});
 	};
 

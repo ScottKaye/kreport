@@ -3,19 +3,47 @@
 <head>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>{{ title }} - kReport 1.0</title>
+	<title>
+		@if (Mongo.IsConnected()) {
+			<text>{{ title }} - </text>
+		}
+		kReport 1.0
+	</title>
 	<link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon">
 	<link href="http://fonts.googleapis.com/css?family=Lato:400,700,900" rel="stylesheet">
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/angular-chart.js/0.8.4/angular-chart.min.css" rel="stylesheet" />
 	<link href="~/Style/site.css" rel="stylesheet">
 	@{
-		foreach (var theme in Model.Themes)
+		if (Model.Themes != null)
 		{
-			<link href="@theme" rel="stylesheet" />
+			foreach (var theme in Model.Themes)
+			{
+				<link href="@theme" rel="stylesheet" />
+			}
 		}
 	}
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
 </head>
+
+@if (!Mongo.IsConnected())
+{
+	<body>
+		@RenderBody()
+		<header class="main-header top">
+			<div class="main-header-content">
+				<span class="header-title">No connection</span>
+				<p class="lead">A connection to the database could not be created.  Sorry!</p>
+				<p>Some things to try:</p>
+				<ul>
+					<li>Is <code>mongod</code> running?  Try running <code>service mongod status</code>.</li>
+					<li>Can the database be connected to from the command line?  Try <code>mongo</code>.</li>
+				</ul>
+			</div>
+		</header>
+	</body>
+	return;
+}
+
 <body ng-controller="baseController as base" ng-cloak>
 	<nav>
 		<span class="page-title">
@@ -66,9 +94,10 @@
 
 	<div class="main" ui-view></div>
 
-	@if (Context.User.Identity.IsAuthenticated)
+	@if (Context.User.Identity.IsAuthenticated
+				&& (Model.Themes != null && Array.IndexOf(Model.Themes, "/Style/Themes/no-chat.css") == -1))
 	{
-		<div class="chat-box" ng-controller="chatController as chat">
+		<div class="chat-box" ng-controller="chatController as chat" ng-class="{raised:(base.requests | filter:{checked:true}).length}">
 			<div class="chat-messages">
 				<div class="message"
 					 ng-repeat="msg in chat.messages"
@@ -92,7 +121,7 @@
 				   ng-disabled="!chat.connected">
 			<div class="chat-extra"></div>
 		</div>
-			}
+	}
 
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js"></script>
