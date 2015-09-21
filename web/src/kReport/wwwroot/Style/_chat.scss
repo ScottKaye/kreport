@@ -8,23 +8,23 @@
 	font-size: 0.8em;
 	color: #bbb;
 	transition: all 250ms ease;
+	transform: translateY(calc(100% - 30px));
 
-	&::before {
-		content: "Chat";
-		display: block;
+	&.visible {
+		transform: none;
+	}
+
+	&.visible.raised {
+		transform: translateY(-66px);
+	}
+
+	header {
 		background: rgba(0,0,0,0.3);
 		border-bottom: 1px solid #111;
 		color: #999;
-		top: 0;
-		left: 0;
-		right: 0;
-		font-size: 0.9em;
-		padding: 3px 5px;
-		height: 20px;
-	}
-
-	&.raised {
-		transform: translateY(-66px);
+		padding: 5px 10px;
+		height: 30px;
+		cursor: pointer;
 	}
 
 	.chat-users {
@@ -40,7 +40,7 @@
 		overflow-y: scroll;
 		display: inline-block;
 		padding: 5px;
-		height: 250px;
+		height: 240px;
 		width: 250px;
 
 		.message {
@@ -97,7 +97,7 @@
 		position: absolute;
 		bottom: 0;
 		left: 0;
-		width: 250px;
+		width: 240px;
 		font-size: 1em;
 		padding: 5px 8px;
 		margin: 0;

@@ -141,7 +141,7 @@ action-panel {
     font-size: 1.2em;
     padding: 15px 20px;
     width: 6%;
-    min-width: 100px; }
+    min-width: 150px; }
     action-panel header small {
       display: block;
       font-weight: 400;
@@ -583,21 +583,19 @@ label.checkbox {
   box-shadow: 0 0 0 1px rgba(255, 153, 0, 0.3);
   font-size: 0.8em;
   color: #bbb;
-  transition: all 250ms ease; }
-  .chat-box::before {
-    content: "Chat";
-    display: block;
+  transition: all 250ms ease;
+  transform: translateY(calc(100% - 30px)); }
+  .chat-box.visible {
+    transform: none; }
+  .chat-box.visible.raised {
+    transform: translateY(-66px); }
+  .chat-box header {
     background: rgba(0, 0, 0, 0.3);
     border-bottom: 1px solid #111;
     color: #999;
-    top: 0;
-    left: 0;
-    right: 0;
-    font-size: 0.9em;
-    padding: 3px 5px;
-    height: 20px; }
-  .chat-box.raised {
-    transform: translateY(-66px); }
+    padding: 5px 10px;
+    height: 30px;
+    cursor: pointer; }
   .chat-box .chat-users {
     overflow-y: scroll;
     padding: 5px;
@@ -609,7 +607,7 @@ label.checkbox {
     overflow-y: scroll;
     display: inline-block;
     padding: 5px;
-    height: 250px;
+    height: 240px;
     width: 250px; }
     .chat-box .chat-messages .message {
       margin-bottom: 5px;
@@ -642,7 +640,7 @@ label.checkbox {
     position: absolute;
     bottom: 0;
     left: 0;
-    width: 250px;
+    width: 240px;
     font-size: 1em;
     padding: 5px 8px;
     margin: 0;
@@ -687,3 +685,4 @@ label.checkbox {
     filter: grayscale(100%);
     opacity: 0.25;
     -webkit-filter: grayscale(100%); }
+

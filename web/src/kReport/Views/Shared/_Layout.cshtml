@@ -97,7 +97,11 @@
 	@if (Context.User.Identity.IsAuthenticated
 				&& (Model.Themes != null && Array.IndexOf(Model.Themes, "/Style/Themes/no-chat.css") == -1))
 	{
-		<div class="chat-box" ng-controller="chatController as chat" ng-class="{raised:(base.requests | filter:{checked:true}).length}">
+		<div class="chat-box"
+			 ng-init="base.chatVisible=true"
+			 ng-controller="chatController as chat"
+			 ng-class="{raised:(base.requests | filter:{checked:true}).length,visible:base.chatVisible}">
+			<header ng-click="base.chatVisible=!base.chatVisible">Chat</header>
 			<div class="chat-messages">
 				<div class="message"
 					 ng-repeat="msg in chat.messages"
