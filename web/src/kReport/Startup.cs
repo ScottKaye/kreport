@@ -42,7 +42,10 @@ namespace kReport
 			services.AddMvc();
 			services.AddSession();
 			services.AddCaching();
-			services.AddSignalR();
+			services.AddSignalR(options=>
+			{
+				options.EnableJSONP = true;
+			});
 
 			services.Configure<AuthorizationOptions>(options =>
 			{

@@ -57,7 +57,7 @@ ul:not(.ul) {
   padding: 0;
   list-style: none; }
   ul:not(.ul) li:not(:last-child) {
-    margin-bottom: 5px; }
+    margin-bottom: 10px; }
 
 a {
   text-decoration: none;
