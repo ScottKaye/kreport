@@ -65,24 +65,6 @@
           "lib/net45/EntityFramework.Relational.dll": {}
         }
       },
-      "EntityFramework.SqlServer/7.0.0-beta7": {
-        "type": "package",
-        "dependencies": {
-          "EntityFramework.Relational": "7.0.0-beta7"
-        },
-        "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core"
-        ],
-        "compile": {
-          "lib/net45/EntityFramework.SqlServer.dll": {}
-        },
-        "runtime": {
-          "lib/net45/EntityFramework.SqlServer.dll": {}
-        }
-      },
       "Ix-Async/1.2.5": {
         "type": "package",
         "frameworkAssemblies": [
@@ -555,26 +537,6 @@
         },
         "runtime": {
           "lib/dnx451/Microsoft.AspNet.Identity.dll": {}
-        }
-      },
-      "Microsoft.AspNet.Identity.EntityFramework/3.0.0-beta7": {
-        "type": "package",
-        "dependencies": {
-          "EntityFramework.SqlServer": "7.0.0-beta7",
-          "Microsoft.AspNet.Identity": "3.0.0-beta7"
-        },
-        "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core",
-          "System.Threading.Tasks"
-        ],
-        "compile": {
-          "lib/dnx451/Microsoft.AspNet.Identity.EntityFramework.dll": {}
-        },
-        "runtime": {
-          "lib/dnx451/Microsoft.AspNet.Identity.EntityFramework.dll": {}
         }
       },
       "Microsoft.AspNet.JsonPatch/1.0.0-beta7": {
@@ -1765,21 +1727,6 @@
         "repo.json"
       ]
     },
-    "EntityFramework.SqlServer/7.0.0-beta7": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "BnWIuGFwN5Gauc2spVR95KBXL7jDVcyBb25wSxddMty7wTe+JqOlCHcLdHWaUQj8f7+GvMQEZC9NZV+/T+57pw==",
-      "files": [
-        "EntityFramework.SqlServer.7.0.0-beta7.nupkg",
-        "EntityFramework.SqlServer.7.0.0-beta7.nupkg.sha512",
-        "EntityFramework.SqlServer.nuspec",
-        "lib/dnxcore50/EntityFramework.SqlServer.dll",
-        "lib/dnxcore50/EntityFramework.SqlServer.xml",
-        "lib/net45/EntityFramework.SqlServer.dll",
-        "lib/net45/EntityFramework.SqlServer.xml",
-        "repo.json"
-      ]
-    },
     "Ix-Async/1.2.5": {
       "type": "package",
       "sha512": "8EXO8q7cpDUH9G2q+UOPOO/6uZ9aN7mx/4xjFIfkp+qLWVJiYuglkRhjY8Ggs2CucXzHR8GHnovJKB5yQoYaJg==",
@@ -2149,21 +2096,6 @@
         "Microsoft.AspNet.Identity.3.0.0-beta7.nupkg",
         "Microsoft.AspNet.Identity.3.0.0-beta7.nupkg.sha512",
         "Microsoft.AspNet.Identity.nuspec",
-        "repo.json"
-      ]
-    },
-    "Microsoft.AspNet.Identity.EntityFramework/3.0.0-beta7": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "G/+m4ifuqLDkLCKcfFmJG/8vzNVNW2M9BTdXVG24ST7Q/KPNKcBA9amsu8/AfPj8StrjJMUmU7HeYYvJ2NMVNA==",
-      "files": [
-        "lib/dnx451/Microsoft.AspNet.Identity.EntityFramework.dll",
-        "lib/dnx451/Microsoft.AspNet.Identity.EntityFramework.xml",
-        "lib/dnxcore50/Microsoft.AspNet.Identity.EntityFramework.dll",
-        "lib/dnxcore50/Microsoft.AspNet.Identity.EntityFramework.xml",
-        "Microsoft.AspNet.Identity.EntityFramework.3.0.0-beta7.nupkg",
-        "Microsoft.AspNet.Identity.EntityFramework.3.0.0-beta7.nupkg.sha512",
-        "Microsoft.AspNet.Identity.EntityFramework.nuspec",
         "repo.json"
       ]
     },
@@ -3666,7 +3598,6 @@
       "Microsoft.AspNet.Diagnostics >= 1.0.0-beta7",
       "Microsoft.AspNet.Diagnostics.Entity >= 7.0.0-beta7",
       "Microsoft.AspNet.Identity >= 3.0.0-beta7",
-      "Microsoft.AspNet.Identity.EntityFramework >= 3.0.0-beta7",
       "Microsoft.AspNet.Mvc >= 6.0.0-beta7",
       "Microsoft.AspNet.Server.IIS >= 1.0.0-beta7",
       "Microsoft.AspNet.Server.Kestrel >= 1.0.0-beta7",

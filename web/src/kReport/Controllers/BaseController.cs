@@ -1,4 +1,5 @@
-﻿using kReport.Models;
+﻿using kReport.Infrastructure;
+using kReport.Models;
 using Microsoft.AspNet.Authentication.Cookies;
 using Microsoft.AspNet.Mvc;
 using System;
@@ -57,10 +58,14 @@ namespace kReport.Controllers
 
 				//Get themes
 				List<string> themes = new List<string>();
-				foreach (var theme in Mongo.GetEnabledThemes())
+				var enabledThemes = Mongo.GetEnabledThemes();
+				if (enabledThemes != null)
 				{
-					string file = Url.Content("~/Style/Themes/" + theme + ".css");
-					themes.Add(file);
+					foreach (var theme in enabledThemes)
+					{
+						string file = Url.Content("~/Style/Themes/" + theme + ".css");
+						themes.Add(file);
+					}
 				}
 				model.Themes = themes.ToArray();
 			}
