@@ -113,7 +113,6 @@
 			border-color: $primary; //bright
 			background: transparentize($primary, 0.9);
 			box-shadow: 0 0 10px 2px $primary; //bright
-
 			& ~ .chat-extra {
 				height: 20px;
 				filter: none;

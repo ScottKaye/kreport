@@ -350,13 +350,12 @@ app.controller("settingsController", function ($http) {
 	var e = this;
 
 	e.user;
-	e.currentTimeUTC = new Date().getTime();
 
 	e.saveUser = function () {
 		$http.post("/k/SaveUser", {
 			id: e.user.Id,
 			user: e.user,
-			delete: false
+			"delete": false
 		}).then(function (response) {
 			notify.show({
 				message: "Updated settings."
@@ -366,7 +365,6 @@ app.controller("settingsController", function ($http) {
 
 	$http.get("/k/GetCurrentUser").then(function (response) {
 		e.user = response.data;
-		console.log(e.user);
 	});
 });
 

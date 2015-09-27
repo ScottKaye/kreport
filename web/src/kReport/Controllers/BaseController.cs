@@ -1,7 +1,6 @@
 ﻿using kReport.Models;
 using Microsoft.AspNet.Authentication.Cookies;
 using Microsoft.AspNet.Mvc;
-using Microsoft.AspNet.Mvc.Filters;
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
