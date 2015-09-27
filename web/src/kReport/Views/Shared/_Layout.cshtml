@@ -3,12 +3,7 @@
 <head>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>
-		@if (Mongo.IsConnected()) {
-			<text>{{ title }} - </text>
-		}
-		kReport 1.0
-	</title>
+	<title ng-bind="title + ' kReport 1.0'">kReport 1.0</title>
 	<link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon">
 	<link href="http://fonts.googleapis.com/css?family=Lato:400,700,900" rel="stylesheet">
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/angular-chart.js/0.8.4/angular-chart.min.css" rel="stylesheet" />
@@ -22,7 +17,6 @@
 			}
 		}
 	}
-	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
 </head>
 
 @if (!Mongo.IsConnected())
@@ -44,7 +38,7 @@
 	return;
 }
 
-<body ng-controller="baseController as base" ng-cloak>
+<body ng-controller="baseController as base">
 	<nav>
 		<span class="page-title">
 			<a href="#" ui-sref="index">kReport</a>
@@ -96,7 +90,7 @@
 
 	@RenderBody()
 
-	<div class="main" ui-view></div>
+	<div class="main" ui-view ng-cloak></div>
 
 	@if (Context.User.Identity.IsAuthenticated
 				&& (Model.Themes != null && Array.IndexOf(Model.Themes, "/Style/Themes/no-chat.css") == -1))
@@ -139,8 +133,9 @@
 	</script>
 
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.15/angular-ui-router.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-chart.js/0.8.4/angular-chart.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-moment/0.10.3/angular-moment.min.js"></script>
