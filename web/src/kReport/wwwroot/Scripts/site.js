@@ -96,34 +96,120 @@ $(function () {
 	});
 });
 
-var notif;
-var notif_timeout;
+//Small notification library
+(function (notify, undefined) {
+	var defaults = {
+		message: null,
+		error: false,
+		refresh: false,
+		options: [],
+		timeout: 3000
+	},
+    container;
 
-function notification(options) {
-	if (!options.message) return;
-	if (notif) notif.remove();
-
-	if (options.refresh) {
-		options.refresh = false;
-		localStorage.notification = JSON.stringify(options);
-		window.location.reload();
-		return;
+	function extendOptions(o1, o2) {
+		var n = {
+			message: o2.message,
+			error: o2.error,
+			refresh: o2.refresh,
+			options: o2.options,
+			timeout: o2.timeout
+		};
+		for (var prop in o2)
+			if (o1.hasOwnProperty(prop)) n[prop] = o1[prop];
+		return n;
 	}
 
-	clearTimeout(notif_timeout);
+	function Notif(options) {
+		var self = this;
 
-	notif = $("<notification-toast></notification-toast>").text(options.message);
-	if (options.error) notif.addClass("red");
-	$(document.body).append(notif);
-	notif_timeout = setTimeout(function () {
-		notif.remove();
-	}, 3000);
-}
+		var el = document.createElement("div");
+		el.classList.add("notification");
+		if (options.error) el.classList.add("error");
+		el.innerText = options.message;
 
-$(function () {
-	if (localStorage.notification) {
-		var options = JSON.parse(localStorage.notification);
-		localStorage.removeItem("notification");
-		notification(options);
+		var progress = document.createElement("div");
+		progress.classList.add("progress");
+		el.appendChild(progress);
+		progress.style.animationDuration = options.timeout + "ms";
+
+		if (options.options) {
+			var buttons = document.createElement("div");
+			buttons.classList.add("options");
+			options.options.forEach(function (c) {
+				var btn = document.createElement("button");
+				btn.innerText = c.title;
+				btn.onclick = c.callback.bind(self);
+				buttons.appendChild(btn);
+			});
+			el.appendChild(buttons);
+		}
+
+		this.options = options;
+		this.hidden = true;
+		this.element = el;
 	}
-});
+
+	Notif.prototype.hide = function () {
+		container.removeChild(this.element);
+		this.hidden = true;
+		return this;
+	};
+
+	Notif.prototype.show = function () {
+		if (this.options.refresh) {
+			var to = this.options.refresh;
+			delete this.options.refresh;
+			delete this.options.options;
+			localStorage["nnp"] = JSON.stringify(this.options);
+			if (to === true) {
+				window.location.reload();
+			} else {
+				window.location = window.location.origin + window.location.pathname + to;
+				window.location.reload();
+			}
+			return;
+		}
+
+		this.element.classList.add("in");
+		window.setTimeout(function () {
+			this.element.classList.remove("in");
+		}.bind(this), 250);
+		container.appendChild(this.element);
+
+		if (this.options.timeout > 0) {
+			window.setTimeout(function () {
+				if (!this.hidden) {
+					this.element.classList.add("out");
+					window.setTimeout(function () {
+						container.removeChild(this.element);
+					}.bind(this), 500);
+					this.hidden = true;
+				}
+			}.bind(this), this.options.timeout);
+		}
+
+		this.hidden = false;
+		return this;
+	};
+
+	notify.create = function (options) {
+		return new Notif(extendOptions(options || {}, defaults));
+	};
+
+	notify.show = function (options) {
+		return notify.create(options).show();
+	};
+
+	(function () {
+		container = document.createElement("section");
+		container.className = "notification-container";
+		document.body.appendChild(container);
+
+		var nnp = localStorage.nnp;
+		if (nnp) try {
+			notify.show(JSON.parse(nnp));
+			delete localStorage.nnp;
+		} catch (e) { }
+	})();
+}(window.notify = window.notify || {}));

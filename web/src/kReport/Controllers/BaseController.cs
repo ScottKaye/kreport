@@ -1,4 +1,5 @@
 ﻿using kReport.Models;
+using Microsoft.AspNet.Authentication.Cookies;
 using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.Mvc.Filters;
 using System;
@@ -41,7 +42,17 @@ namespace kReport.Controllers
 				{
 					string id = Context.User.FindFirst(ClaimTypes.NameIdentifier).Value;
 					kUser user = Mongo.GetUserById(id);
-					model.User = user;
+
+					//Likely a deleted user who still has claims
+					if (user == null)
+					{
+						Context.Authentication.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+						model.User = null;
+					}
+					else
+					{
+						model.User = user;
+					}
 				}
 				catch { model.User = null; }
 

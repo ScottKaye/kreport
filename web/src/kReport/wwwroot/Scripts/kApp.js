@@ -22,6 +22,13 @@ app.config(function ($compileProvider, $httpProvider, $stateProvider, $urlRouter
 			$rootScope.title = "Dashboard";
 		}
 	})
+	.state("settings", {
+		url: "/Settings",
+		templateUrl: "/Partials/settings.html",
+		controller: function ($rootScope) {
+			$rootScope.title = "Settings";
+		}
+	})
 	.state("admin", {
 		url: "/Admin",
 		templateUrl: "/Partials/admin.html",
@@ -44,7 +51,6 @@ app.controller("baseController", function ($http, signalR, $scope, $rootScope) {
 	var e = this;
 
 	e.kreport = window.kreport;
-	e.request = null;
 	e.requestDetail = null;
 	e.requests = [];
 	e.user = {};
@@ -64,15 +70,13 @@ app.controller("baseController", function ($http, signalR, $scope, $rootScope) {
 	};
 
 	e.login = function () {
-		console.log(e.user);
-
 		$http.post("/k/Login", e.user).then(function (response) {
-			notification({
+			notify.show({
 				refresh: true,
 				message: response.data
 			});
 		}, function (response) {
-			notification({
+			notify.show({
 				message: response.data,
 				error: true
 			});
@@ -108,18 +112,24 @@ app.controller("baseController", function ($http, signalR, $scope, $rootScope) {
 		});
 	};
 
+	e.check = function (req) {
+		if (window.kreport.authenticated) {
+			req.checked = !req.checked;
+		}
+	};
+
 	e.checkedDone = function (done) {
 		//done will be true to mark as done, false to unmark
 		$http.post("k/Done", {
 			ids: getChecked(),
 			done: done
 		}).then(function (response) {
-			notification({
+			notify.show({
 				message: done ? "Marked as done." : "Unmarked as done."
 			});
 			e.uncheckAll();
 		}, function (response) {
-			notification({
+			notify.show({
 				message: "Failed to change mark.",
 				error: true
 			});
@@ -140,12 +150,12 @@ app.controller("baseController", function ($http, signalR, $scope, $rootScope) {
 			e.requests = e.requests.filter(function (c) {
 				return !c.checked;
 			});
-			notification({
+			notify.show({
 				message: "Request" + (ids.length != 1 ? "s" : "") + " deleted."
 			});
 			e.uncheckAll();
 		}, function (response) {
-			notification({
+			notify.show({
 				message: "Failed to delete items.",
 				error: true
 			});
@@ -155,6 +165,11 @@ app.controller("baseController", function ($http, signalR, $scope, $rootScope) {
 	//Launches the steam protocol handler to join a server
 	e.joinSelected = function () {
 		window.open("steam://connect/" + e.requestDetail.Server.IP, "_self");
+	};
+
+	//Gets the time...  At the timezone.
+	e.getTimeAtTimeZone = function (offset) {
+		return new moment().utc().add(offset, "hours").format("h:mma");
 	};
 
 	//Fires when a new request is received from SignalR
@@ -193,6 +208,8 @@ app.factory("signalR", function ($rootScope) {
 app.controller("chatController", function ($http, $scope) {
 	"use strict";
 
+	if (localStorage.chatVisible == null) localStorage.chatVisible = true;
+
 	var e = this;
 	var hub = $.connection.Chat;
 
@@ -200,6 +217,14 @@ app.controller("chatController", function ($http, $scope) {
 	e.message;
 	e.messages = [];
 	e.users = [];
+
+	try { e.chatVisible = JSON.parse(localStorage.chatVisible); }
+	catch (ex) { e.chatVisible = false; }
+
+	e.toggleVisibility = function () {
+		e.chatVisible = !e.chatVisible;
+		localStorage.chatVisible = e.chatVisible;
+	};
 
 	e.keydown = function (evt) {
 		if (evt.which === 13 && e.message.length > 0) {
@@ -227,11 +252,6 @@ app.controller("chatController", function ($http, $scope) {
 
 	$.connection.hub.start().done(function () {
 		$scope.$apply(function () {
-			e.messages.push({
-				system: true,
-				author: {},
-				message: "Connected."
-			});
 			e.connected = true;
 		});
 	});
@@ -252,12 +272,13 @@ app.controller("startController", function ($http, $state) {
 			Password: e.Password,
 			ConfirmPassword: e.ConfirmPassword
 		}).then(function () {
-			notification({
-				refresh: true,
-				message: "First user created.  Welcome, " + user.Email + "!"
+			notify.show({
+				timeout: 10000,
+				refresh: "#/Dashboard",
+				message: "First user created.  Welcome, " + e.Email + "!"
 			});
 		}, function (response) {
-			notification({
+			notify.show({
 				message: response.data,
 				error: true
 			});
@@ -278,7 +299,7 @@ app.controller("adminController", function ($http, $window) {
 		$http.post("/k/SaveSettings", {
 			settings: JSON.stringify(e.settings)
 		}).then(function (response) {
-			notification({
+			notify.show({
 				refresh: true,
 				message: "Saved settings."
 			});
@@ -286,7 +307,6 @@ app.controller("adminController", function ($http, $window) {
 	};
 
 	e.saveUser = function (user) {
-		console.log(user, user.delete);
 		$http.post("/k/SaveUser", {
 			id: user.Id,
 			user: user,
@@ -296,7 +316,7 @@ app.controller("adminController", function ($http, $window) {
 				e.users = e.users.filter(function (c) {
 					return !c.Delete;
 				});
-				notification({
+				notify.show({
 					message: "Deleted " + (user.Name || user.Email || "the mysterious, faceless user") + "."
 				});
 			}
@@ -304,12 +324,12 @@ app.controller("adminController", function ($http, $window) {
 				if (response.data != null) {
 					user.Id = response.data;
 				}
-				notification({
+				notify.show({
 					message: "Updated " + (user.Name || user.Email || "the hooded, dark figure with no name") + "."
 				});
 			}
 		}, function (response) {
-			notification({
+			notify.show({
 				message: "Failed to update user.",
 				error: true
 			});
@@ -326,9 +346,49 @@ app.controller("adminController", function ($http, $window) {
 	});
 });
 
+app.controller("settingsController", function ($http) {
+	var e = this;
+
+	e.user;
+	e.currentTimeUTC = new Date().getTime();
+
+	e.saveUser = function () {
+		$http.post("/k/SaveUser", {
+			id: e.user.Id,
+			user: e.user,
+			delete: false
+		}).then(function (response) {
+			notify.show({
+				message: "Updated settings."
+			});
+		});
+	};
+
+	$http.get("/k/GetCurrentUser").then(function (response) {
+		e.user = response.data;
+		console.log(e.user);
+	});
+});
+
 //Used for ng-repeat to reverse the order items are displayed
 app.filter("reverse", function () {
 	return function (items) {
 		return items.slice().reverse();
+	};
+});
+
+//Allows selects with a convert-to-number attribute to match ng-model to numbers
+//From https://docs.angularjs.org/api/ng/directive/select
+app.directive("convertToNumber", function () {
+	return {
+		require: "ngModel",
+		link: function (scope, element, attrs, ngModel) {
+			ngModel.$parsers.push(function (val) {
+				return +val;
+			});
+			ngModel.$formatters.push(function (val) {
+				return "" + val;
+			});
+		}
 	};
 });

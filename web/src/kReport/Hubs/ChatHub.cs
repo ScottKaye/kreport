@@ -34,15 +34,18 @@ namespace kReport.Models
 				content = content.Substring(0, 200);
 			}
 
-			ChatUser user = Users.Values.Where(u => u.Connections.Contains(Context.ConnectionId)).Single();
-			ChatMessage message = new ChatMessage
+			ChatUser user = Users.Values.Where(u => u.Connections.Contains(Context.ConnectionId)).SingleOrDefault();
+			if (user != null)
 			{
-				system = false,
-				date = DateTime.Now.ToString("h:mm") + DateTime.Now.ToString("tt").ToLower(),
-				message = content,
-				author = user
-			};
-			Clients.All.sendMessage(message);
+				ChatMessage message = new ChatMessage
+				{
+					system = false,
+					date = DateTime.Now.ToString("h:mm") + DateTime.Now.ToString("tt").ToLower(),
+					message = content,
+					author = user
+				};
+				Clients.All.sendMessage(message);
+			}
 		}
 
 		public override Task OnConnected()
@@ -59,6 +62,9 @@ namespace kReport.Models
 				{
 					chatUser = new ChatUser(user);
 				}
+
+				//Update name
+				chatUser.Name = user.GetName();
 
 				chatUser.Connections.Add(Context.ConnectionId);
 
@@ -86,7 +92,13 @@ namespace kReport.Models
 				ChatUser user = Users.Values.Where(u => u.Connections.Contains(Context.ConnectionId)).Single();
 				user.Connections.Remove(Context.ConnectionId);
 
-				Clients.All.updateUsers(Users);
+				if (user.Connections.Count == 0)
+				{
+					ChatUser chatout;
+					SendSystemMessage(user.Name + " disconnected.");
+					Users.TryRemove(user.Id.ToString(), out chatout);
+					Clients.All.updateUsers(Users);
+				}
 			}
 			catch { }
 

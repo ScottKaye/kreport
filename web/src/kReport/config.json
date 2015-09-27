@@ -1,5 +1,9 @@
 ﻿{
 	"kreport": {
-		"key":  "testkey123"
+		"key": "testkey123",
+		"email": {
+			"pass": "your-gmail-address@gmail.com",
+			"user": "your-gmail-password"
+		}
 	}
 }

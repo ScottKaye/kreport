@@ -51,6 +51,10 @@
 		</span>
 		<ul>
 			<li><a ui-sref="index" ui-sref-active="current">Dashboard</a></li>
+			@if (Context.User.Identity.IsAuthenticated)
+			{
+				<li><a ui-sref="settings" ui-sref-active="current">Settings</a></li>
+			}
 			@if (Context.User.IsInRole("Admin"))
 			{
 				<li><a ui-sref="admin" ui-sref-active="current">Admin</a></li>
@@ -98,10 +102,9 @@
 				&& (Model.Themes != null && Array.IndexOf(Model.Themes, "/Style/Themes/no-chat.css") == -1))
 	{
 		<div class="chat-box"
-			 ng-init="base.chatVisible=true"
 			 ng-controller="chatController as chat"
-			 ng-class="{raised:(base.requests | filter:{checked:true}).length,visible:base.chatVisible}">
-			<header ng-click="base.chatVisible=!base.chatVisible">Chat</header>
+			 ng-class="{raised:(base.requests | filter:{checked:true}).length,visible:chat.chatVisible}">
+			<header ng-click="chat.toggleVisibility()">Chat</header>
 			<div class="chat-messages">
 				<div class="message"
 					 ng-repeat="msg in chat.messages"

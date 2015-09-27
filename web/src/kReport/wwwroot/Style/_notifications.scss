@@ -1,0 +1,81 @@
+﻿$radius: 0;
+
+.notification-container {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    width: 300px;
+    height: 200px;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    pointer-events: none;
+    overflow: hidden;
+	z-index: $max;
+}
+
+.notification {
+    pointer-events: all;
+    box-sizing: border-box;
+    width: 100%;
+    border-radius: $radius;
+    background: linear-gradient(#111, #222);
+    box-shadow: 0 5px 5px rgba(0,0,0,0.2), inset 0 0 0 1px transparentize($primary, 0.8);
+    color: #eee;
+    padding: 8px 12px;
+    margin-top: 5px;
+    font: 10pt sans-serif;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    .progress {
+        position: absolute;
+        bottom:0;
+        left:0;
+        width: 100%;
+        height: 1px;
+        background: $primary;
+        animation: timeout 3s ease-out 1 forwards;
+    }
+    .options {
+        margin-left: 10px;
+        button {
+            border: none;
+            background: transparent;
+            color: $primary;
+            font-weight: 700;
+            cursor: pointer;
+            outline: none;
+            transition: all 100ms ease;
+            &:hover {
+                text-shadow: 0 0 15px $primary;
+            }
+        }
+    }
+    &.error {
+        background: linear-gradient(darken($red, 20%), $red);
+    }
+    &.in {
+        animation: in 250ms ease 1 forwards;
+    }
+    &.out {
+        animation: in 500ms ease 1 forwards reverse;
+    }
+}
+@keyframes in {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: none;
+        opacity: 1;
+    }
+}
+
+@keyframes timeout {
+    to { width: 0 }
+}

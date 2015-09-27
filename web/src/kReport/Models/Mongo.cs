@@ -152,7 +152,12 @@ namespace kReport.Models
 			{
 				Upsert = true,
 				Query = Query.EQ("_id", user.Id),
-				Update = Update.Set("Name", user.Name ?? "").Set("Email", user.Email ?? "").Set("Admin", user.Admin)
+				Update = Update
+							.Set("Name", user.Name ?? "")
+							.Set("Email", user.Email ?? "")
+							.Set("Admin", user.Admin)
+							.Set("TimeZoneOffset", user.TimeZoneOffset)
+							.Set("NotificationSettings", user.NotificationSettings.ToBsonDocument())
 			});
 		}
 

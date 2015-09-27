@@ -11,6 +11,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Net.Mail;
+using System.Net;
 
 namespace kReport.Controllers
 {
@@ -18,13 +20,13 @@ namespace kReport.Controllers
 	//TODO: Do this with interfaces
 	public class ApiReport
 	{
-		public Report KRequest { get; set; }
+		public Report kRequest { get; set; }
 		public string Key { get; set; }
 	}
 
 	public class ApiMiddleman
 	{
-		public Middleman KRequest { get; set; }
+		public Middleman kRequest { get; set; }
 		public string Key { get; set; }
 	}
 
@@ -104,7 +106,26 @@ namespace kReport.Controllers
 						return u;
 					}).ToList();
 			}
+			else Response.StatusCode = 401;
 			return null;
+		}
+
+		[HttpGet]
+		public kUser GetCurrentUser()
+		{
+			//The user may not be found, or may have been deleted
+			try
+			{
+				string id = Context.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+				kUser user = Mongo.GetUserById(id);
+				user.Password = null;
+				return user;
+			}
+			catch
+			{
+				Response.StatusCode = 404;
+				return null;
+			}
 		}
 
 		[HttpGet]
@@ -114,6 +135,7 @@ namespace kReport.Controllers
 			{
 				return Mongo.GetSettings();
 			}
+			else Response.StatusCode = 401;
 			return null;
 		}
 
@@ -124,34 +146,63 @@ namespace kReport.Controllers
 			{
 				Mongo.SaveSettings(JsonConvert.DeserializeObject(settings));
 			}
+			else Response.StatusCode = 401;
 		}
 
 		[HttpPost]
 		public string SaveUser(string id, kUser user, bool delete)
 		{
-			if (Context.User.IsInRole("Admin"))
+			//Admins can update all users, users can only update themselves
+			if (!(Context.User.IsInRole("Admin") || Context.User.FindFirst(ClaimTypes.NameIdentifier).Value == id))
 			{
-				//Get ObjectId for new or existing user
-				if (id == null) user.Id = ObjectId.GenerateNewId();
-				else user.Id = ObjectId.Parse(id);
+				Response.StatusCode = 401;
+				return null;
+			}
 
-				if (delete)
+			//User must have an email
+			if (user.Email == null)
+			{
+				Response.StatusCode = 400;
+				return null;
+			}
+
+			//Create or update user?
+			if (id == null)
+			{
+				//Create new user
+				user.Id = ObjectId.GenerateNewId();
+				user.TimeZoneOffset = 0;
+				user.NotificationSettings = new NotificationSettings
 				{
-					Mongo.DeleteUser(user);
-					return null;
-				}
-				else
+					ReceiveEmail = false,
+					EmailStart = new TimeSpan(0, 0, 0),
+					EmailEnd = new TimeSpan(23, 59, 59)
+				};
+			}
+			else
+			{
+				//Use existing user
+				user.Id = ObjectId.Parse(id);
+
+				//Admins cannot demote or delete themselves; ensure they aren't trying
+				if (Context.User.FindFirst(ClaimTypes.NameIdentifier).Value == user.Id.ToString())
 				{
-					if (user.Email == null)
-					{
-						Response.StatusCode = 400;
-						return null;
-					}
-					Mongo.SaveUser(user);
-					return user.Id.ToString();
+					user.Admin = true;
+					delete = false;
 				}
 			}
-			return null;
+
+			//Only admins can delete users
+			if (Context.User.IsInRole("Admin") && delete)
+			{
+				Mongo.DeleteUser(user);
+				return null;
+			}
+			else
+			{
+				Mongo.SaveUser(user);
+				return user.Id.ToString();
+			}
 		}
 
 		[HttpGet]
@@ -161,11 +212,7 @@ namespace kReport.Controllers
 			{
 				UpdateHub.Test(updateContext);
 			}
-		}
-
-		[HttpGet]
-		public void TestPush()
-		{
+			else Response.StatusCode = 401;
 		}
 
 		// Returns a 202 Accepted to tell the mobile app that this is a kReport server
@@ -260,10 +307,19 @@ namespace kReport.Controllers
 				return "Passwords did not match.";
 			}
 
-			kUser user = new kUser();
-			user.Admin = true;
-			user.Email = info.Email;
-			user.Password = PasswordHash.CreateHash(info.Password);
+			kUser user = new kUser
+			{
+				Admin = true,
+				Email = info.Email,
+				Password = PasswordHash.CreateHash(info.Password),
+				TimeZoneOffset = 0,
+				NotificationSettings = new NotificationSettings
+				{
+					ReceiveEmail = true,
+					EmailStart = new TimeSpan(0, 0, 0),
+					EmailEnd = new TimeSpan(23, 59, 59)
+				}
+			};
 
 			Mongo.AddUser(user);
 			Login(new LoginUserInfo
@@ -283,8 +339,8 @@ namespace kReport.Controllers
 		{
 			if (Helpers.ValidateKey(req.Key))
 			{
-				Save(req.KRequest);
-				UpdateHub.NewRequest(updateContext, req.KRequest);
+				Save(req.kRequest);
+				UpdateHub.NewRequest(updateContext, req.kRequest);
 				Response.StatusCode = 200;
 			}
 			else Response.StatusCode = 412;
@@ -295,8 +351,8 @@ namespace kReport.Controllers
 		{
 			if (Helpers.ValidateKey(req.Key))
 			{
-				Save(req.KRequest);
-				UpdateHub.NewRequest(updateContext, req.KRequest);
+				Save(req.kRequest);
+				UpdateHub.NewRequest(updateContext, req.kRequest);
 				Response.StatusCode = 200;
 			}
 			else Response.StatusCode = 412;
@@ -321,6 +377,7 @@ namespace kReport.Controllers
 				ObjectId[] oids = StringsToObjectIds(ids);
 				Mongo.Done(oids, done);
 			}
+			else Response.StatusCode = 401;
 		}
 
 		[HttpPost]
@@ -331,6 +388,7 @@ namespace kReport.Controllers
 				ObjectId[] oids = StringsToObjectIds(ids);
 				Mongo.Delete(oids);
 			}
+			else Response.StatusCode = 401;
 		}
 
 		private ObjectId[] StringsToObjectIds(string[] ids)
