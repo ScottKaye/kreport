@@ -58,14 +58,10 @@ namespace kReport.Controllers
 
 				//Get themes
 				List<string> themes = new List<string>();
-				var enabledThemes = Mongo.GetEnabledThemes();
-				if (enabledThemes != null)
+				foreach (var theme in Mongo.GetEnabledThemes())
 				{
-					foreach (var theme in enabledThemes)
-					{
-						string file = Url.Content("~/Style/Themes/" + theme + ".css");
-						themes.Add(file);
-					}
+					string file = Url.Content("~/Style/Themes/" + theme + ".css");
+					themes.Add(file);
 				}
 				model.Themes = themes.ToArray();
 			}

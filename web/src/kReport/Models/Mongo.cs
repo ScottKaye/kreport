@@ -275,7 +275,7 @@ namespace kReport.Models
 			{
 				return settings.GetValue("themes").AsBsonArray;
 			}
-			else return null;
+			else return new BsonArray();
 		}
 
 		internal static void AddUser(kUser user)

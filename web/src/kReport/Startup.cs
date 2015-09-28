@@ -79,8 +79,6 @@ namespace kReport
 			app.UseCookieAuthentication(options =>
 			{
 				options.AutomaticAuthentication = true;
-				//TODO
-				options.LoginPath = "/Admin/Login";
 			});
 			app.UseMvc(routes =>
 			{
