@@ -11,11 +11,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
-using System.Net.Mail;
-using System.Net;
 
 namespace kReport.Controllers
 {
+	#region Wrapper Classes
 	/// <summary>
 	/// Wrapper class to receive a report, given a valid key
 	/// </summary>
@@ -54,6 +53,7 @@ namespace kReport.Controllers
 		public string Password { get; set; }
 		public string ConfirmPassword { get; set; }
 	}
+	#endregion
 
 	/// <summary>
 	/// Handles incoming requests on /k/MethodName?param=value
@@ -78,6 +78,7 @@ namespace kReport.Controllers
 			}
 		}
 
+		#region Get Actions
 		/// <summary>
 		/// Returns a list of all requests
 		/// </summary>
@@ -190,7 +191,83 @@ namespace kReport.Controllers
 			else Response.StatusCode = 401;
 			return null;
 		}
+		#endregion
 
+		#region Login & Logout
+		/// <summary>
+		/// Verifies password and sets a login cookie accordingly
+		/// </summary>
+		/// <param name="info">Username or email of user, and their password attempt</param>
+		/// <returns>A friendly message welcoming the user back.</returns>
+		[HttpPost]
+		public string Login(LoginUserInfo info)
+		{
+			kUser user;
+			bool passwordSet = false;
+
+			try
+			{
+				if (info.UsernameOrEmail.Contains('@'))
+				{
+					//Log in with email
+					user = Mongo.GetUserByEmail(info.UsernameOrEmail);
+				}
+				else
+				{
+					//Log in with username
+					user = Mongo.GetUserByName(info.UsernameOrEmail);
+				}
+
+				//If the password is null, the password the user entered is their new password
+				if (info.Password != null && user.Password == null)
+				{
+					user.Password = PasswordHash.CreateHash(info.Password);
+					Mongo.UpdatePassword(user);
+					passwordSet = true;
+				}
+
+				if (!PasswordHash.ValidatePassword(info.Password, user.Password))
+					throw new Exception();
+			}
+			catch
+			{
+				//Don't tell the user exactly what went wrong with the login process
+				Response.StatusCode = 403;
+				return "Incorrect username/email or password.";
+			}
+
+			var claims = new[]
+			{
+				new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+				new Claim(ClaimTypes.Role, user.Admin ? "Admin" : "User")
+			};
+			var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+			Context.Authentication.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
+
+			Response.StatusCode = 200;
+			if (passwordSet)
+			{
+				return "Your password has been set, " + user.GetName() + ".";
+			}
+			else
+			{
+				return "Welcome back, " + user.GetName() + "!";
+			}
+		}
+
+		/// <summary>
+		/// Removes all login cookies and clears claims
+		/// </summary>
+		/// <returns>Redirect to home</returns>
+		[HttpGet]
+		public ActionResult Logout()
+		{
+			Context.Authentication.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+			return RedirectToAction("Index", "Home");
+		}
+		#endregion
+
+		#region Administrative Actions
 		/// <summary>
 		/// Saves data (currently only themes/stylesheet adjustments) to the settings collection.
 		/// Only responds to administrative requests.
@@ -271,120 +348,6 @@ namespace kReport.Controllers
 		}
 
 		/// <summary>
-		/// Triggers a debug message to appear in the developer console for all users connected to SignalR
-		/// Used to test if the SignalR server is working
-		/// </summary>
-		[HttpGet]
-		public void TestHub()
-		{
-			if (Context.User.IsInRole("Admin"))
-			{
-				UpdateHub.Test(updateContext);
-			}
-			else Response.StatusCode = 401;
-		}
-
-		/// <summary>
-		/// Sends an email to the email specified in config.json
-		/// Used to test if the mail server is working
-		/// </summary>
-		/// <returns></returns>
-		[HttpGet]
-		public string TestMail()
-		{
-			if (Context.User.IsInRole("Admin"))
-			{
-				string email = Startup.Configuration.GetSection("kreport:email:user").Value;
-				Mail.Send(email, "kReport Test Email", "If you are receiving this email, the kReport mail server is operational.");
-				return "Email sent to " + email;
-			}
-			else Response.StatusCode = 401;
-			return null;
-		}
-
-		/// <summary>
-		/// Always returns a 202 Accepted to tell the mobile app that this is a kReport server
-		/// Not the best way to do this, but if any non-kReport server gives a 202 for /k/IsApp, I don't know what to think
-		/// </summary>
-		[HttpGet]
-		public void IsApp()
-		{
-			Response.StatusCode = 202;
-		}
-
-		/// <summary>
-		/// Verifies password and sets a login cookie accordingly
-		/// </summary>
-		/// <param name="info">Username or email of user, and their password attempt</param>
-		/// <returns>A friendly message welcoming the user back.</returns>
-		[HttpPost]
-		public string Login(LoginUserInfo info)
-		{
-			kUser user;
-			bool passwordSet = false;
-
-			try
-			{
-				if (info.UsernameOrEmail.Contains('@'))
-				{
-					//Log in with email
-					user = Mongo.GetUserByEmail(info.UsernameOrEmail);
-				}
-				else
-				{
-					//Log in with username
-					user = Mongo.GetUserByName(info.UsernameOrEmail);
-				}
-
-				//If the password is null, the password the user entered is their new password
-				if (info.Password != null && user.Password == null)
-				{
-					user.Password = PasswordHash.CreateHash(info.Password);
-					Mongo.UpdatePassword(user);
-					passwordSet = true;
-				}
-
-				if (!PasswordHash.ValidatePassword(info.Password, user.Password))
-					throw new Exception();
-			}
-			catch
-			{
-				//Don't tell the user exactly what went wrong with the login process
-				Response.StatusCode = 403;
-				return "Incorrect username/email or password.";
-			}
-
-			var claims = new[]
-			{
-				new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-				new Claim(ClaimTypes.Role, user.Admin ? "Admin" : "User")
-			};
-			var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-			Context.Authentication.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
-
-			Response.StatusCode = 200;
-			if (passwordSet)
-			{
-				return "Your password has been set, " + user.GetName() + ".";
-			}
-			else
-			{
-				return "Welcome back, " + user.GetName() + "!";
-			}
-		}
-
-		/// <summary>
-		/// Removes all login cookies and clears claims
-		/// </summary>
-		/// <returns>Redirect to home</returns>
-		[HttpGet]
-		public ActionResult Logout()
-		{
-			Context.Authentication.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-			return RedirectToAction("Index", "Home");
-		}
-
-		/// <summary>
 		/// Handles the creation of the first user in the database
 		/// This can only be called once, and will return an error if a user already exists
 		/// </summary>
@@ -436,7 +399,39 @@ namespace kReport.Controllers
 			return "First user created!  You have been automatically logged in.";
 		}
 
-		#region Public APIs
+		/// <summary>
+		/// Changes a record's "done" attribute
+		/// </summary>
+		/// <param name="ids">IDs of records to change</param>
+		/// <param name="done">True to mark as done, false to mark as not-done</param>
+		[HttpPost]
+		public void Done(string[] ids, bool done)
+		{
+			if (Context.User.Identity.IsAuthenticated)
+			{
+				ObjectId[] oids = StringsToObjectIds(ids);
+				Mongo.Done(oids, done);
+			}
+			else Response.StatusCode = 401;
+		}
+
+		/// <summary>
+		/// Permanently eletes a record from the database
+		/// </summary>
+		/// <param name="ids">IDs of records to delete</param>
+		[HttpPost]
+		public void Delete(string[] ids)
+		{
+			if (Context.User.IsInRole("Admin"))
+			{
+				ObjectId[] oids = StringsToObjectIds(ids);
+				Mongo.Delete(oids);
+			}
+			else Response.StatusCode = 401;
+		}
+		#endregion
+
+		#region Sourcemod-Facing Actions
 		/// <summary>
 		/// Receives a strongly-typed report off the /k/Report path
 		/// </summary>
@@ -469,6 +464,62 @@ namespace kReport.Controllers
 			}
 			else Response.StatusCode = 412;
 		}
+		#endregion
+
+		#region Misc API Actions
+		/// <summary>
+		/// Triggers a debug message to appear in the developer console for all users connected to SignalR
+		/// Used to test if the SignalR server is working
+		/// </summary>
+		[HttpGet]
+		public void TestHub()
+		{
+			if (Context.User.IsInRole("Admin"))
+			{
+				UpdateHub.Test(updateContext);
+			}
+			else Response.StatusCode = 401;
+		}
+
+		/// <summary>
+		/// Sends an email to the email specified in config.json
+		/// Used to test if the mail server is working
+		/// </summary>
+		/// <returns></returns>
+		[HttpGet]
+		public string TestMail()
+		{
+			if (Context.User.IsInRole("Admin"))
+			{
+				string email = Startup.Configuration.GetSection("kreport:email:user").Value;
+				Mail.Send(email, "kReport Test Email", "If you are receiving this email, the kReport mail server is operational.");
+				return "Email sent to " + email;
+			}
+			else Response.StatusCode = 401;
+			return null;
+		}
+
+		/// <summary>
+		/// Always returns a 202 Accepted to tell the mobile app that this is a kReport server
+		/// Not the best way to do this, but if any non-kReport server gives a 202 for /k/IsApp, I don't know what to think
+		/// </summary>
+		[HttpGet]
+		public void IsApp()
+		{
+			Response.StatusCode = 202;
+		}
+		#endregion
+
+		#region Private API Methods
+		/// <summary>
+		/// Converts an array of stringly-typed ObjectIds to actual ObjectIds
+		/// </summary>
+		/// <param name="ids">ObjectIds as strings</param>
+		/// <returns>Array of converted ObjectIds</returns>
+		private ObjectId[] StringsToObjectIds(string[] ids)
+		{
+			return ids.Select(i => new ObjectId(i)).ToArray();
+		}
 
 		/// <summary>
 		/// Used to save incoming requests to the database
@@ -480,46 +531,6 @@ namespace kReport.Controllers
 			Mongo.IncrementRequestsToday(req);
 			Mongo.SaveRequest(req);
 		}
-
-		/// <summary>
-		/// Changes a record's "done" attribute
-		/// </summary>
-		/// <param name="ids">IDs of records to change</param>
-		/// <param name="done">True to mark as done, false to mark as not-done</param>
-		[HttpPost]
-		public void Done(string[] ids, bool done)
-		{
-			if (Context.User.Identity.IsAuthenticated)
-			{
-				ObjectId[] oids = StringsToObjectIds(ids);
-				Mongo.Done(oids, done);
-			}
-			else Response.StatusCode = 401;
-		}
-
-		/// <summary>
-		/// Permanently eletes a record from the database
-		/// </summary>
-		/// <param name="ids">IDs of records to delete</param>
-		[HttpPost]
-		public void Delete(string[] ids)
-		{
-			if (Context.User.IsInRole("Admin"))
-			{
-				ObjectId[] oids = StringsToObjectIds(ids);
-				Mongo.Delete(oids);
-			}
-			else Response.StatusCode = 401;
-		}
-
-		/// <summary>
-		/// Converts an array of stringly-typed ObjectIds to actual ObjectIds
-		/// </summary>
-		/// <param name="ids">ObjectIds as strings</param>
-		/// <returns>Array of converted ObjectIds</returns>
-		private ObjectId[] StringsToObjectIds(string[] ids)
-		{
-			return ids.Select(i => new ObjectId(i)).ToArray();
-		}
+		#endregion
 	}
 }
