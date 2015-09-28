@@ -1,0 +1,7 @@
+Turn on access for Less Secure apps on gmail:
+	https://www.google.com/settings/security/lesssecureapps
+	https://g.co/allowaccess
+
+Download GMail cert:
+	mozroots --import --ask-remove --machine
+	certmgr -ssl smtps://smtp.gmail.com:465

@@ -16,26 +16,38 @@ using System.Net;
 
 namespace kReport.Controllers
 {
-	//Allow API requests to store a Key somewhere for verification
-	//TODO: Do this with interfaces
+	/// <summary>
+	/// Wrapper class to receive a report, given a valid key
+	/// </summary>
 	public class ApiReport
 	{
 		public Report kRequest { get; set; }
 		public string Key { get; set; }
 	}
 
+	/// <summary>
+	/// Wrapper class to receive a request for a middleman, given a valid key
+	/// </summary>
 	public class ApiMiddleman
 	{
 		public Middleman kRequest { get; set; }
 		public string Key { get; set; }
 	}
 
+	/// <summary>
+	/// Wrapper class to handle login information
+	/// Users can log in with their username or email
+	/// </summary>
 	public class LoginUserInfo
 	{
 		public string UsernameOrEmail { get; set; }
 		public string Password { get; set; }
 	}
 
+	/// <summary>
+	/// The first user is required to submit only an email
+	/// Both passwords must match
+	/// </summary>
 	public class FirstUserInfo
 	{
 		public string Email { get; set; }
@@ -43,12 +55,18 @@ namespace kReport.Controllers
 		public string ConfirmPassword { get; set; }
 	}
 
+	/// <summary>
+	/// Handles incoming requests on /k/MethodName?param=value
+	/// </summary>
 	[Route("[controller]/[action]")]
 	public class kController : Controller
 	{
 		private IConnectionManager _connectionManager;
 		private IHubContext updateContext;
 
+		/// <summary>
+		/// Allows the controller to connect to the SignalR hub
+		/// </summary>
 		[FromServices]
 		public IConnectionManager ConnectionManager
 		{
@@ -60,12 +78,21 @@ namespace kReport.Controllers
 			}
 		}
 
+		/// <summary>
+		/// Returns a list of all requests
+		/// </summary>
+		/// <returns></returns>
 		[HttpGet]
 		public IEnumerable<kRequest> GetAllRequests()
 		{
 			return Mongo.GetAllRequests().AsEnumerable();
 		}
 
+		/// <summary>
+		/// Returns a full request, given its ID
+		/// </summary>
+		/// <param name="id">ID of request to return</param>
+		/// <returns></returns>
 		public kRequest GetRequestById(string id)
 		{
 			ObjectId objid;
@@ -76,24 +103,40 @@ namespace kReport.Controllers
 			return null;
 		}
 
+		/// <summary>
+		/// Returns the number of requests received this week
+		/// </summary>
+		/// <returns></returns>
 		[HttpGet]
 		public int[] GetNumRequestsThisWeek()
 		{
 			return Mongo.GetNumRequestsThisWeek();
 		}
 
+		/// <summary>
+		/// Returns the number of requests received this year
+		/// </summary>
+		/// <returns></returns>
 		[HttpGet]
 		public int[] GetNumRequestsThisYear()
 		{
 			return Mongo.GetNumRequestsThisYear();
 		}
 
+		/// <summary>
+		/// Returns the number of requests each server has received
+		/// </summary>
+		/// <returns></returns>
 		[HttpGet]
 		public dynamic GetServerStats()
 		{
 			return Mongo.GetServerStats();
 		}
 
+		/// <summary>
+		/// Returns a list of all users
+		/// </summary>
+		/// <returns></returns>
 		[HttpGet]
 		public List<kUser> GetAllUsers()
 		{
@@ -110,6 +153,10 @@ namespace kReport.Controllers
 			return null;
 		}
 
+		/// <summary>
+		/// Returns a user with the password set to null
+		/// </summary>
+		/// <returns></returns>
 		[HttpGet]
 		public kUser GetCurrentUser()
 		{
@@ -128,6 +175,11 @@ namespace kReport.Controllers
 			}
 		}
 
+		/// <summary>
+		/// Returns a list of available settings and their parameters.
+		/// Only responds to administrative requests.
+		/// </summary>
+		/// <returns></returns>
 		[HttpGet]
 		public dynamic GetSettings()
 		{
@@ -139,6 +191,11 @@ namespace kReport.Controllers
 			return null;
 		}
 
+		/// <summary>
+		/// Saves data (currently only themes/stylesheet adjustments) to the settings collection.
+		/// Only responds to administrative requests.
+		/// </summary>
+		/// <param name="settings">Settings to save</param>
 		[HttpPost]
 		public void SaveSettings(string settings)
 		{
@@ -149,6 +206,14 @@ namespace kReport.Controllers
 			else Response.StatusCode = 401;
 		}
 
+		/// <summary>
+		/// Saves a users details to the database
+		/// Admins can update all users, but normal users can only updates their own information
+		/// </summary>
+		/// <param name="id">User ID to update.  This will replace the ID in the user field.</param>
+		/// <param name="user">Collection of details to update for the user in the id parameter.</param>
+		/// <param name="delete">If true, this will delete the user from the database.</param>
+		/// <returns></returns>
 		[HttpPost]
 		public string SaveUser(string id, kUser user, bool delete)
 		{
@@ -205,6 +270,10 @@ namespace kReport.Controllers
 			}
 		}
 
+		/// <summary>
+		/// Triggers a debug message to appear in the developer console for all users connected to SignalR
+		/// Used to test if the SignalR server is working
+		/// </summary>
 		[HttpGet]
 		public void TestHub()
 		{
@@ -215,14 +284,39 @@ namespace kReport.Controllers
 			else Response.StatusCode = 401;
 		}
 
-		// Returns a 202 Accepted to tell the mobile app that this is a kReport server
+		/// <summary>
+		/// Sends an email to the email specified in config.json
+		/// Used to test if the mail server is working
+		/// </summary>
+		/// <returns></returns>
+		[HttpGet]
+		public string TestMail()
+		{
+			if (Context.User.IsInRole("Admin"))
+			{
+				string email = Startup.Configuration.GetSection("kreport:email:user").Value;
+				Mail.Send(email, "kReport Test Email", "If you are receiving this email, the kReport mail server is operational.");
+				return "Email sent to " + email;
+			}
+			else Response.StatusCode = 401;
+			return null;
+		}
+
+		/// <summary>
+		/// Always returns a 202 Accepted to tell the mobile app that this is a kReport server
+		/// Not the best way to do this, but if any non-kReport server gives a 202 for /k/IsApp, I don't know what to think
+		/// </summary>
 		[HttpGet]
 		public void IsApp()
 		{
 			Response.StatusCode = 202;
 		}
 
-		// Site & app logins
+		/// <summary>
+		/// Verifies password and sets a login cookie accordingly
+		/// </summary>
+		/// <param name="info">Username or email of user, and their password attempt</param>
+		/// <returns>A friendly message welcoming the user back.</returns>
 		[HttpPost]
 		public string Login(LoginUserInfo info)
 		{
@@ -279,6 +373,10 @@ namespace kReport.Controllers
 			}
 		}
 
+		/// <summary>
+		/// Removes all login cookies and clears claims
+		/// </summary>
+		/// <returns>Redirect to home</returns>
 		[HttpGet]
 		public ActionResult Logout()
 		{
@@ -286,6 +384,12 @@ namespace kReport.Controllers
 			return RedirectToAction("Index", "Home");
 		}
 
+		/// <summary>
+		/// Handles the creation of the first user in the database
+		/// This can only be called once, and will return an error if a user already exists
+		/// </summary>
+		/// <param name="info">Email, password, and password confirmation wrapper class</param>
+		/// <returns>Welcoming message</returns>
 		[HttpPost]
 		public string FirstUser(FirstUserInfo info)
 		{
@@ -332,8 +436,12 @@ namespace kReport.Controllers
 			return "First user created!  You have been automatically logged in.";
 		}
 
-		// Plugin-facing APIs
-		// POST k/Report?kRequest.Sender.Name=Kredit&kRequest.Sender.ID3=U:1:49061560&Key=testkey etc
+		#region Public APIs
+		/// <summary>
+		/// Receives a strongly-typed report off the /k/Report path
+		/// </summary>
+		/// <example>POST k/Report?kRequest.Sender.Name=Kredit&kRequest.Sender.ID3=U:1:49061560&Key=testkey etc</example>
+		/// <param name="req"></param>
 		[HttpPost]
 		public void Report(ApiReport req)
 		{
@@ -346,6 +454,10 @@ namespace kReport.Controllers
 			else Response.StatusCode = 412;
 		}
 
+		/// <summary>
+		/// Receives a strongly-typed middleman request off the /k/Middleman path
+		/// </summary>
+		/// <param name="req"></param>
 		[HttpPost]
 		public void Middleman(ApiMiddleman req)
 		{
@@ -358,6 +470,11 @@ namespace kReport.Controllers
 			else Response.StatusCode = 412;
 		}
 
+		/// <summary>
+		/// Used to save incoming requests to the database
+		/// Also increments a few counters for the tracker/analytics
+		/// </summary>
+		/// <param name="req">Request to save</param>
 		private void Save(kRequest req)
 		{
 			Mongo.IncrementRequestsToday(req);
@@ -380,6 +497,10 @@ namespace kReport.Controllers
 			else Response.StatusCode = 401;
 		}
 
+		/// <summary>
+		/// Permanently eletes a record from the database
+		/// </summary>
+		/// <param name="ids">IDs of records to delete</param>
 		[HttpPost]
 		public void Delete(string[] ids)
 		{
@@ -391,6 +512,11 @@ namespace kReport.Controllers
 			else Response.StatusCode = 401;
 		}
 
+		/// <summary>
+		/// Converts an array of stringly-typed ObjectIds to actual ObjectIds
+		/// </summary>
+		/// <param name="ids">ObjectIds as strings</param>
+		/// <returns>Array of converted ObjectIds</returns>
 		private ObjectId[] StringsToObjectIds(string[] ids)
 		{
 			return ids.Select(i => new ObjectId(i)).ToArray();
