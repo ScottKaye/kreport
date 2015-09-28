@@ -1,0 +1,134 @@
+﻿<div class="flex" ng-controller="settingsController as settings">
+	<section class="entries">
+		<header class="entries-title">Information</header>
+		<article>
+			<form>
+				<table class="request-table">
+					<tr>
+						<th>Name</th>
+						<td>
+							<input type="text" placeholder="Name"
+								   ng-model="settings.user.Name" />
+						</td>
+					</tr>
+					<tr>
+						<th>Email</th>
+						<td>
+							<input required type="email" placeholder="Email"
+								   ng-model="settings.user.Email" />
+						</td>
+					</tr>
+					<tr>
+						<th>Timezone</th>
+						<td>
+							<select ng-model="settings.user.TimeZoneOffset" convert-to-number>
+								<option value="-12">UTC -12:00</option>
+								<option value="-11">UTC -11:00</option>
+								<option value="-10">UTC -10:00</option>
+								<option value="-9.5">UTC -9:30</option>
+								<option value="-9">UTC -9:00</option>
+								<option value="-8">UTC -8:00</option>
+								<option value="-7">UTC -7:00</option>
+								<option value="-6">UTC -6:00</option>
+								<option value="-5">UTC -5:00</option>
+								<option value="-4.5">UTC -4:30</option>
+								<option value="-4">UTC -4:00</option>
+								<option value="-3.5">UTC -3:30</option>
+								<option value="-3">UTC -3:00</option>
+								<option value="-2">UTC -2:00</option>
+								<option value="-1">UTC -1:00</option>
+								<option value="0">UTC  00:00</option>
+								<option value="1">UTC +1:00</option>
+								<option value="2">UTC +2:00</option>
+								<option value="3">UTC +3:00</option>
+								<option value="3.5">UTC +3:30</option>
+								<option value="4">UTC +4:00</option>
+								<option value="4.5">UTC +4:30</option>
+								<option value="5">UTC +5:00</option>
+								<option value="5.5">UTC +5:30</option>
+								<option value="5.45">UTC +5:45</option>
+								<option value="6">UTC +6:00</option>
+								<option value="6.5">UTC +6:30</option>
+								<option value="7">UTC +7:00</option>
+								<option value="8">UTC +8:00</option>
+								<option value="8.5">UTC +8:30</option>
+								<option value="8:45">UTC +8:45</option>
+								<option value="9">UTC +9:00</option>
+								<option value="9.5">UTC +9:30</option>
+								<option value="10">UTC +10:00</option>
+								<option value="10.5">UTC +10:30</option>
+								<option value="11">UTC +11:00</option>
+								<option value="11.5">UTC +11:30</option>
+								<option value="12">UTC +12:00</option>
+								<option value="12.45">UTC +12:45</option>
+								<option value="13">UTC +13:00</option>
+								<option value="14">UTC +14:00</option>
+							</select>
+							<p>It is currently {{ base.getTimeAtTimeZone(settings.user.TimeZoneOffset) }}.</p>
+						</td>
+					</tr>
+					<tr>
+						<td>&nbsp;</td>
+						<td>
+							<button type="submit"
+									ng-click="settings.saveUser()">
+								Save
+							</button>
+						</td>
+					</tr>
+				</table>
+			</form>
+		</article>
+	</section>
+	<section class="entries">
+		<header class="entries-title">Notifications</header>
+		<article>
+			<p>kReport can notify you through email if a report is received and you are not connected.</p>
+			<form>
+				<table class="request-table">
+					<tr>
+						<th>Enable emails</th>
+						<td>
+							<label class="checkbox inline">
+								<input type="checkbox" ng-model="settings.user.NotificationSettings.ReceiveEmail" />
+							</label>
+						</td>
+					</tr>
+					<tr>
+						<th title="You will not receive emails from kReport before this time.">
+							Minimum time
+							<br />
+							<small>24-hour clock</small>
+						</th>
+						<td>
+							<input type="text" pattern="(\d+:){2}\d{2}" required placeholder="HH:MM:SS" size="10"
+								   ng-model="settings.user.NotificationSettings.EmailStart" />
+							<button ng-click="settings.user.NotificationSettings.EmailStart='00:00:00'">Day start</button>
+						</td>
+					</tr>
+					<tr>
+						<th title="You will not receive emails from kReport after this time.">
+							Maximum time
+							<br />
+							<small>24-hour clock</small>
+						</th>
+						<td>
+							<input type="text" pattern="(\d+:){2}\d{2}" required placeholder="HH:MM:SS" size="10"
+								   ng-model="settings.user.NotificationSettings.EmailEnd" />
+							<button ng-click="settings.user.NotificationSettings.EmailEnd='23:59:59'">Day end</button>
+						</td>
+					</tr>
+					<tr>
+						<td>&nbsp;</td>
+						<td>
+							<button type="submit"
+									ng-click="settings.saveUser()">
+								Save
+							</button>
+						</td>
+					</tr>
+				</table>
+			</form>
+		</article>
+	</section>
+</div>
